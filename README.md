@@ -403,7 +403,7 @@ gateway 192.168.100.1
 <br/>
 
 <details>
-<summary><strong>Настройка динамической трансляции <code>NAT</code></strong></summary>
+<summary><strong>Настройка динамической трансляции через iptables <code>NAT</code></strong></summary>
 
 ### Настройка динамической сетевой трансляции на _`ISP`_
 
@@ -431,7 +431,26 @@ iptables –t nat –A POSTROUTING –s 172.16.4.0/28 –o ens192 –j MASQUERAD
 iptables –t nat –A POSTROUTING –s 172.16.5.0/28 –o ens192 –j MASQUERADE   
 iptables-save > /etc/iptables/rules.v4  
 ```
-  
+</br>
+
+<details> 
+<summary><strong><code>Либо настройка через nftaables (если не работает, вернуться к другому варианту)</code></strong></summary> 
+
+  ```
+nano /etc/nftables.conf
+   ```
+   ```
+table ip nat {
+    chain postrouting {
+        type nat hook postrouting priority 100; policy accept;
+
+        # Интерфейс который раздаёт инет
+        oif "eth0" masquerade
+    }
+}
+ ```
+</br>
+
 > **`ens192`** - интерфейс с которого приходит **интернет**
 > 
 > Для проверки можно использовать команду: **`iptables –L –t nat`** - должны высветится в Chain POSTROUTING две настроенные подсети  
