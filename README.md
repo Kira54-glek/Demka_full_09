@@ -432,7 +432,7 @@ iptables –t nat –A POSTROUTING –s 172.16.5.0/28 –o ens192 –j MASQUERAD
 iptables-save > /etc/iptables/rules.v4  
 ```
 </br>
-<details> 
+
 
 <details> 
 <summary><strong><code>Либо настройка через nftaables (если не работает, вернуться к другому варианту)</code></strong></summary> 
@@ -450,7 +450,6 @@ table ip nat {
     }
 }
  ```
-</br>
  
 > **`ens192`** - интерфейс с которого приходит **интернет**
 > 
