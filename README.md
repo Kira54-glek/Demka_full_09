@@ -689,7 +689,7 @@ nano /etc/ssh/sshd_config
 ```
 
 ```
-Port 2024
+Port 2026
 MaxAuthTries 2
 PasswordAuthentication yes
 Banner /etc/ssh/banner
