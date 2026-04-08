@@ -433,8 +433,6 @@ iptables-save > /etc/iptables/rules.v4
 ```
 </br>
 
-
-<details> 
 <summary><strong><code>Либо настройка через nftaables (если не работает, вернуться к другому варианту)</code></strong></summary> 
 
   ```
