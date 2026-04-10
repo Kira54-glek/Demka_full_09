@@ -1540,7 +1540,7 @@ echo "/dev/md0 /raid ext4 defaults 0 0" >> /etc/fstab
 
 <br/>
 
-##ЗАДНИЕ 3 NFS
+## ЗАДНИЕ 3 NFS
 
 <br/>
 HQ-SRV
@@ -1566,7 +1566,7 @@ echo "nfs -rw 192.168.100.62:/raid/nfs" >> /etc/auto.nfs
 systemctl restart autofs
 <br/>
 
-##Задание 4. NTP (ISP)
+## Задание 4. NTP (ISP)
 
 <br/>
 
@@ -1588,7 +1588,7 @@ systemctl restart chrony
 
 <br/>
 
-## Задание 6 . ANSIBLE (BR-SRV)
+## Задание 5 . ANSIBLE (BR-SRV)
 
 <br/>
 
@@ -1614,7 +1614,7 @@ ansible all -m ping
 
 <br/>
 
-## Задание 7. DOCKER (BR-SRV)
+## Задание 6. DOCKER (BR-SRV)
 
 <br/>
 
@@ -1648,26 +1648,56 @@ docker-compose up -d
 
 <br/>
 
-🌍 9. WEB (HQ-SRV)
+## Задание 7. WEB (HQ-SRV)
+
+<br/>
+
 apt install apache2 mariadb-server php php-mysql -y
+
 mysql
+
 CREATE DATABASE webdb;
+
 CREATE USER 'web'@'%' IDENTIFIED BY 'P@ssw0rd';
+
 GRANT ALL ON webdb.* TO 'web'@'%';
+
 mysql webdb < dump.sql
+
 cp index.php /var/www/html/
+
 cp -r images /var/www/html/
-🔁 10. NAT (ПОРТЫ)
+
+<br/>
+
+## Задание 8. NAT (ПОРТЫ)
+
+<br/>
+
 HQ-RTR
+
 iptables -t nat -A PREROUTING -p tcp --dport 8080 -j DNAT --to 192.168.100.62:80
+
 iptables -t nat -A PREROUTING -p tcp --dport 2026 -j DNAT --to 192.168.100.62:22
+
 BR-RTR
+
 iptables -t nat -A PREROUTING -p tcp --dport 8080 -j DNAT --to 192.168.0.2:8080
+
 iptables -t nat -A PREROUTING -p tcp --dport 2026 -j DNAT --to 192.168.0.2:22
-🌐 11. NGINX PROXY (ISP)
+
+<br/>
+
+## Задаие 9. NGINX PROXY (ISP)
+
+<br/>
+
 apt install nginx apache2-utils -y
+
 htpasswd -c /etc/nginx/.htpasswd WEB
+
 nano /etc/nginx/sites-available/default
+
 server {
   server_name web.au-team.irpo;
 
@@ -1686,7 +1716,16 @@ server {
     proxy_pass http://172.16.5.2:8080;
   }
 }
+
 systemctl restart nginx
-🌍 12. ЯНДЕКС БРАУЗЕР (HQ-CLI)
+
+<br/>
+
+## Задание 10. ЯНДЕКС БРАУЗЕР (HQ-CLI)
+
+<br/>
+
 wget https://repo.yandex.ru/yandex-browser/YANDEX-BROWSER-KEY.GPG
 apt install ./yandex-browser*.deb
+
+<br/>
