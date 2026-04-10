@@ -112,46 +112,46 @@
 
   - Для **Linux** используется команда: <strong>`hostnamectl set-hostname (имя устройства.au-team.irpo)`</strong>
   
-  - Обновить имя можно введя команду: **`bash`**
+  - Обновить имя можно введя команду: **`newgrp`**
 ### ISP
 ```
 hostnamectl set-hostname isp.au-team.irpo
-bash
+newgrp
 ```
 <br/>
 
 ### HQ-RTR
 ```
 hostnamectl set-hostname hq-rtr.au-team.irpo
-bash
+newgrp
 ```
 <br/>
 
 ### BR-RTR
 ```
 hostnamectl set-hostname br-rtr.au-team.irpo
-bash
+newgrp
 ```
 <br/>
 
 ### HQ-SRV
 ```
 hostnamectl set-hostname hq-srv.au-team.irpo
-bash
+newgrp
 ```
 <br/>
 
 ### HQ-CLI
 ```
 hostnamectl set-hostname hq-cli.au-team.irpo
-bash
+newgrp
 ```
 <br/>
 
 ### BR-SRV
 ```
 hostnamectl set-hostname br-srv.au-team.irpo
-bash
+newgrp
 ```
 <br/>
 
@@ -1495,7 +1495,13 @@ timedatectl set-timezone Asia/Tomsk
 
 <br/>
 
-apt install samba krb5-config winbind -y
+apt install samba krb5-config krb5-user winbind -y
+
+AU-TEAM.IRPO
+
+br-srv.au-team.irpo
+
+br-srv.au-team.irpo
 
 samba-tool domain provision --realm=AU-TEAM.IRPO --domain=AU-TEAM --server-role=dc
 
