@@ -95,11 +95,11 @@
 - Настройте имена устройств согласно топологии. Используйте полное доменное имя
 - На всех устройствах необходимо сконфигурировать IPv4
 - IP-адрес должен быть из приватного диапазона, в случае, если сеть локальная, согласно RFC1918
-- Локальная сеть в сторону HQ-SRV(VLAN100) должна вмещать не более 64 адресов
+- Локальная сеть в сторону HQ-SRV(VLAN100) должна вмещать не более 32 адресов
 - Локальная сеть в сторону HQ-CLI(VLAN200) должна вмещать не более 16 адресов
-- Локальная сеть в сторону BR-SRV должна вмещать не более 32 адресов
 - Локальная сеть для управления(VLAN999) должна вмещать не более 8 адресов
-- Сведения об адресах занесите в отчёт, в качестве примера используйте Таблицу 3
+- Локальная сеть в сторону BR-SRV должна вмещать не более 16 адресов-
+ Сведения об адресах занесите в отчёт, в качестве примера используйте Таблицу 2
 
 </details>
 
@@ -167,26 +167,26 @@ newgrp
 ```
 auto ens224
 iface ens224 inet static
-address 172.16.4.1/28
+address 172.16.1.1/28
 auto ens256
 iface ens256 inet static
-address 172.16.5.1/28
+address 172.16.2.1/28
 ```
 
 ### HQ-RTR: (в 4 и 6 задании продолжение)
 ```
 allow-hotplug ens192
 iface ens192 inet static
-address 172.16.4.2/28
-gateway 172.16.4.1
+address 172.16.1.2/28
+gateway 172.16.1.1
 
 auto gre1
 iface gre1 inet tunnel
 address 172.16.0.1
 netmask 255.255.255.252
 mode gre
-local 172.16.4.2
-endpoint 172.16.5.2
+local 172.16.1.2
+endpoint 172.16.2.2
 ttl 64
 ```
 
@@ -194,20 +194,20 @@ ttl 64
 ```
 allow-hotplug ens192
 iface ens192 inet static
-address 172.16.5.2/28
-gateway 172.16.5.1
+address 172.16.2.2/28
+gateway 172.16.2.1
 
 auto ens224
 iface ens224 inet static
-address 192.168.0.1/27
+address 192.168.0.1/28
 
 auto gre1
 iface gre1 inet tunnel
 address 172.16.0.2
 netmask 255.255.255.252
 mode gre
-local 172.16.5.2
-endpoint 172.16.4.2
+local 172.16.2.2
+endpoint 172.16.1.2
 ttl 64
 ```
 
@@ -216,7 +216,7 @@ ttl 64
 ```
 allow-hotplug ens192
 iface ens192 inet static
-address 192.168.0.2/27
+address 192.168.0.2/28
 gateway 192.168.0.1
 dns-nameservers 192.168.100.62 192.168.0.2
 dns-search au-team.irpo
@@ -227,7 +227,7 @@ dns-search au-team.irpo
 ```
 allow-hotplug ens192
 iface ens192 inet static
-address 192.168.100.62/26
+address 192.168.100.62/27
 gateway 192.168.100.1
 ```
 
@@ -246,7 +246,7 @@ gateway 192.168.100.1
   </tr>
   <tr>
     <td align="center">SRV-Net (VLAN 100)</td>
-    <td align="center">192.168.100.0/26</td>
+    <td align="center">192.168.100.0/27</td>
     <td align="center">192.168.100.1-62</td>
   </tr>
   <tr>
@@ -266,13 +266,13 @@ gateway 192.168.100.1
   </tr>
   <tr>
     <td align="center">ISP-HQ</td>
-    <td align="center">172.16.4.0/28</td>
-    <td align="center">172.16.4.1 - 14</td>
+    <td align="center">172.16.1.0/28</td>
+    <td align="center">172.16.1.1 - 14</td>
   </tr>
   <tr>
     <td align="center">ISP-BR</td>
-    <td align="center">172.16.5.0/28</td>
-    <td align="center">172.16.5.1 - 14</td>
+    <td align="center">172.16.2.0/28</td>
+    <td align="center">172.16.2.1 - 14</td>
   </tr>
 </table>
 <p align="center"><strong>Таблица подсетей</strong></p>
@@ -298,14 +298,14 @@ gateway 192.168.100.1
   </tr>
   <tr>
     <td align="center">ens224</td>
-    <td align="center">172.16.4.1</td>
+    <td align="center">172.16.1.1</td>
     <td align="center">/28</td>
     <td align="center"></td>
     <td align="center">ISP-HQ-RTR</td>
   </tr>
   <tr>
     <td align="center">ens256</td>
-    <td align="center">172.16.5.1</td>
+    <td align="center">172.16.2.1</td>
     <td align="center">/28</td>
     <td align="center"></td>
     <td align="center">ISP-BR-RTR</td>
@@ -313,9 +313,9 @@ gateway 192.168.100.1
   <tr>
     <td align="center" rowspan="3">HQ-RTR</td>
     <td align="center">ens192</td>
-    <td align="center">172.16.4.2</td>
+    <td align="center">172.16.1.2</td>
     <td align="center">/28</td>
-    <td align="center">172.16.4.1</td>
+    <td align="center">172.16.1.1</td>
     <td align="center">ISP-HQ-RTR</td>
   </tr>
   <tr>
@@ -343,7 +343,7 @@ gateway 192.168.100.1
   <tr>
     <td align="center">ens224</td>
     <td align="center">192.168.0.1</td>
-    <td align="center">/27</td>
+    <td align="center">/28</td>
     <td align="center"></td>
     <td align="center">BR-RTR-SRV</td>
   </tr>
@@ -444,7 +444,7 @@ table ip nat {
         type nat hook postrouting priority 100; policy accept;
 
         # Интерфейс который раздаёт инет
-        oif "eth0" masquerade
+        oif "ens192" masquerade
     }
 }
  ```
@@ -628,7 +628,7 @@ ttl 64
   
 auto ens224  
 iface ens224 inet static  
-address 192.168.100.1/26 
+address 192.168.100.1/27 
   
 auto ens224:1  
 iface ens224:1 inet static  
