@@ -1485,3 +1485,7 @@ timedatectl set-timezone Asia/Tomsk
 - Если на `CLI` возникли проблемы, делаем через настройки в графическом интерфейсе и настраиваем там временную зону
 
 </details>
+
+# <div align="center"><strong>⚙️</strong></div> <div align="center"><strong>МОДУЛЬ 2</strong></div>
+
+<br/>
