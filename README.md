@@ -1489,3 +1489,133 @@ timedatectl set-timezone Asia/Tomsk
 # <div align="center"><strong>⚙️</strong></div> <div align="center"><strong>МОДУЛЬ 2</strong></div>
 
 <br/>
+
+ДОРАБОАТЬ
+## Задание 1
+apt install samba krb5-config winbind -y
+samba-tool domain provision --realm=AU-TEAM.IRPO --domain=AU-TEAM --server-role=dc
+
+👉 создаёт контроллер домена
+
+systemctl restart samba
+Пользователи и группа
+for i in {1..5}; do samba-tool user create hquser$i P@ssw0rd; done
+samba-tool group add hq
+for i in {1..5}; do samba-tool group addmembers hq hquser$i; done
+Sudo ограничения
+visudo
+
+Добавить:
+
+%hq ALL=(ALL) NOPASSWD: /bin/cat, /bin/grep, /usr/bin/id
+## Задание 2 RAID (HQ-SRV)
+apt install mdadm -y
+mdadm --create /dev/md0 --level=0 --raid-devices=2 /dev/sdb /dev/sdc
+
+👉 RAID0
+
+mkfs.ext4 /dev/md0
+mkdir /raid
+mount /dev/md0 /raid
+echo "/dev/md0 /raid ext4 defaults 0 0" >> /etc/fstab
+📁 5. NFS
+HQ-SRV
+apt install nfs-kernel-server -y
+mkdir -p /raid/nfs
+echo "/raid/nfs 192.168.200.0/28(rw,sync)" >> /etc/exports
+exportfs -a
+systemctl restart nfs-kernel-server
+HQ-CLI
+apt install autofs -y
+echo "/mnt /etc/auto.nfs" >> /etc/auto.master
+echo "nfs -rw 192.168.100.62:/raid/nfs" >> /etc/auto.nfs
+systemctl restart autofs
+⏰ 6. NTP (ISP)
+apt install chrony -y
+nano /etc/chrony/chrony.conf
+
+Добавить:
+
+server pool.ntp.org iburst
+local stratum 5
+allow 0.0.0.0/0
+systemctl restart chrony
+
+👉 клиенты: HQ-SRV, HQ-CLI, BR-RTR, BR-SRV — указать IP ISP
+
+🤖 7. ANSIBLE (BR-SRV)
+apt install ansible -y
+mkdir -p /etc/ansible
+nano /etc/ansible/hosts
+[hq]
+192.168.100.62
+192.168.200.2
+172.16.4.2
+
+[br]
+172.16.5.2
+ansible all -m ping
+🐳 8. DOCKER (BR-SRV)
+apt install docker.io docker-compose -y
+docker load < site_latest.tar
+docker load < mariadb_latest.tar
+nano docker-compose.yml
+version: '3'
+services:
+  db:
+    image: mariadb_latest
+    container_name: db
+    environment:
+      MYSQL_DATABASE: testdb
+      MYSQL_USER: test
+      MYSQL_PASSWORD: P@ssw0rd
+      MYSQL_ROOT_PASSWORD: root
+
+  testapp:
+    image: site_latest
+    container_name: testapp
+    ports:
+      - "8080:80"
+docker-compose up -d
+🌍 9. WEB (HQ-SRV)
+apt install apache2 mariadb-server php php-mysql -y
+mysql
+CREATE DATABASE webdb;
+CREATE USER 'web'@'%' IDENTIFIED BY 'P@ssw0rd';
+GRANT ALL ON webdb.* TO 'web'@'%';
+mysql webdb < dump.sql
+cp index.php /var/www/html/
+cp -r images /var/www/html/
+🔁 10. NAT (ПОРТЫ)
+HQ-RTR
+iptables -t nat -A PREROUTING -p tcp --dport 8080 -j DNAT --to 192.168.100.62:80
+iptables -t nat -A PREROUTING -p tcp --dport 2026 -j DNAT --to 192.168.100.62:22
+BR-RTR
+iptables -t nat -A PREROUTING -p tcp --dport 8080 -j DNAT --to 192.168.0.2:8080
+iptables -t nat -A PREROUTING -p tcp --dport 2026 -j DNAT --to 192.168.0.2:22
+🌐 11. NGINX PROXY (ISP)
+apt install nginx apache2-utils -y
+htpasswd -c /etc/nginx/.htpasswd WEB
+nano /etc/nginx/sites-available/default
+server {
+  server_name web.au-team.irpo;
+
+  auth_basic "Restricted";
+  auth_basic_user_file /etc/nginx/.htpasswd;
+
+  location / {
+    proxy_pass http://172.16.4.2:8080;
+  }
+}
+
+server {
+  server_name docker.au-team.irpo;
+
+  location / {
+    proxy_pass http://172.16.5.2:8080;
+  }
+}
+systemctl restart nginx
+🌍 12. ЯНДЕКС БРАУЗЕР (HQ-CLI)
+wget https://repo.yandex.ru/yandex-browser/YANDEX-BROWSER-KEY.GPG
+apt install ./yandex-browser*.deb
