@@ -442,9 +442,7 @@ nano /etc/nftables.conf
 table ip nat {
     chain postrouting {
         type nat hook postrouting priority 100; policy accept;
-
-        # Интерфейс который раздаёт инет
-        oif "ens192" masquerade
+        oifname "ens192" masquerade
     }
 }
  ```
