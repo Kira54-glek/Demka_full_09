@@ -1726,6 +1726,7 @@ systemctl restart nginx
 <br/>
 
 wget https://repo.yandex.ru/yandex-browser/YANDEX-BROWSER-KEY.GPG
+
 apt install ./yandex-browser*.deb
 
 <br/>
