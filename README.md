@@ -1493,7 +1493,7 @@ timedatectl set-timezone Asia/Tomsk
 
 <br/>
 
-apt install samba krb5-config krb5-user winbind -y
+apt install samba krb5-config krb5-user winbind smbclient -y
 
 AU-TEAM.IRPO
 
