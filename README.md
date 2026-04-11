@@ -392,9 +392,9 @@ gateway 192.168.100.1
 
   - Настройте маршруты по умолчанию там, где это необходимо 
 
-  - Интерфейс, к которому подключен HQ-RTR, подключен к сети 172.16.4.0/28 **[Выполнено в задании 1]**
+  - Интерфейс, к которому подключен HQ-RTR, подключен к сети 172.16.1.0/28 **[Выполнено в задании 1]**
 
-  - Интерфейс, к которому подключен BR-RTR, подключен к сети 172.16.5.0/28 **[Выполнено в задании 1]**
+  - Интерфейс, к которому подключен BR-RTR, подключен к сети 172.16.2.0/28 **[Выполнено в задании 1]**
 
   - На ISP настройте динамическую сетевую трансляцию в сторону HQ-RTR и BR-RTR для доступа к сети Интернет
 
@@ -414,8 +414,8 @@ echo net.ipv4.ip_forward=1 > /etc/sysctl.conf
 apt-get install iptables iptables-persistent –y
 ```
 ```
-iptables –t nat –A POSTROUTING –s 172.16.4.0/28 –o ens192 –j MASQUERADE  
-iptables –t nat –A POSTROUTING –s 172.16.5.0/28 –o ens192 –j MASQUERADE
+iptables –t nat –A POSTROUTING –s 172.16.1.0/28 –o ens192 –j MASQUERADE  
+iptables –t nat –A POSTROUTING –s 172.16.2.0/28 –o ens192 –j MASQUERADE
 netfilter-persistent save
 systemctl restart netfilter-persistent  
 ```
@@ -427,8 +427,8 @@ systemctl restart netfilter-persistent
 ```  
 apt install iptables  
 apt install iptables iptables-persistent  
-iptables –t nat –A POSTROUTING –s 172.16.4.0/28 –o ens192 –j MASQUERADE   
-iptables –t nat –A POSTROUTING –s 172.16.5.0/28 –o ens192 –j MASQUERADE   
+iptables –t nat –A POSTROUTING –s 172.16.1.0/28 –o ens192 –j MASQUERADE   
+iptables –t nat –A POSTROUTING –s 172.16.2.0/28 –o ens192 –j MASQUERADE   
 iptables-save > /etc/iptables/rules.v4  
 ```
 </br>
@@ -497,7 +497,7 @@ table ip nat {
 
 **1.** Создаём sshuser следующими командами:
 ```
-useradd sshuser -u 1010
+useradd sshuser -u 2026
 passwd sshuser
 P@ssw0rd
 ```
@@ -612,16 +612,16 @@ nano /etc/network/interfaces
 # The primary network interface
 auto ens192  
 iface ens192 inet static  
-address 172.16.4.2/28
-gateway 172.16.4.1
+address 172.16.1.2/28
+gateway 172.16.1.1
 
 auto gre1
 iface gre1 inet tunnel
 address 172.16.0.1
 netmask 255.255.255.252
 mode gre
-local 172.16.4.2
-endpoint 172.16.5.2
+local 172.16.1.2
+endpoint 172.16.2.2
 ttl 64
   
 auto ens224  
@@ -660,7 +660,7 @@ Vlan-raw-device ens224:2
 
 ### Настройка безопасного удаленного доступа на серверах `HQ-SRV` и `BR-SRV`
 
-- Для подключения используйте порт 2024
+- Для подключения используйте порт 2026
 - Разрешите подключения только пользователю sshuser
 - Ограничьте количество попыток входа до двух
 - Настройте баннер «Authorized access only»
@@ -747,8 +747,8 @@ iface gre1 inet tunnel
 address 172.16.0.1
 netmask 255.255.255.252
 mode gre
-local 172.16.4.2
-endpoint 172.16.5.2
+local 172.16.1.2
+endpoint 172.16.2.2
 ttl 64
 ```
 
@@ -777,8 +777,8 @@ iface gre1 inet tunnel
 address 172.16.0.2
 netmask 255.255.255.252
 mode gre
-local 172.16.5.2
-endpoint 172.16.4.2
+local 172.16.2.2
+endpoint 172.16.1.2
 ttl 64
 ```
 
