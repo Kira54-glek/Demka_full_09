@@ -1493,7 +1493,7 @@ timedatectl set-timezone Asia/Tomsk
 
 <br/>
 
-apt install samba krb5-config krb5-user winbind smbclient -y
+apt install samba samba-dsdb-modules samba-vfs-modules acl attr winbind libpam-winbind libnss-winbind krb5-config krb5-user libpam-krb5 smbclient dnsutils net-tools
 
 AU-TEAM.IRPO
 
@@ -1501,9 +1501,44 @@ br-srv.au-team.irpo
 
 br-srv.au-team.irpo
 
-samba-tool domain provision --realm=AU-TEAM.IRPO --domain=AU-TEAM --server-role=dc
+samba-tool domain provision 
 
 👉 создаёт контроллер домена
+
+<br/>
+
+<details>
+<summary><strong>Если не создался домен, прописываем следующее </strong></summary>
+
+</br>
+
+systemctl stop samba-ad-dc smbd nmbd winbind 2>/dev/null
+
+apt purge samba samba-common-bin samba-ad-dc winbind -y
+ 
+apt autoremove -y
+
+rm -rf /etc/samba
+
+rm -rf /var/lib/samba
+
+rm -rf /var/cache/samba
+
+Проверяем имя машины на соответствие нужному доменному имени
+
+Проверяем nano /etc/hosts на наличи ip машины своему домену, если нет, прописываем слудующее:
+
+(BR-SRV-IP либо 192.168.xxx.xxx)  br-srv.au-team.irpo br-srv
+
+Проверяем nano /etc/resolv.conf на наличие локального ip, если нет, прописываем:
+
+nameserver 127.0.0.1
+
+Сохроням и пробуем установить снова
+
+</details>
+
+</br>
 
 systemctl restart samba
 
@@ -1517,8 +1552,6 @@ for i in {1..5}; do samba-tool group addmembers hq hquser$i; done
 Sudo ограничения
 
 visudo
-
-<br/>
 
 Добавить:
 
