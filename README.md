@@ -1491,25 +1491,89 @@ timedatectl set-timezone Asia/Tomsk
 ДОРАБОАТЬ
 ## Задание 1
 
+<details>
+<summary><strong>Описание задания: </strong></summary>
+
+Настройте контроллер домена Samba DC на сервере BR-SRV: 
+
+•	Имя домена au-team.irpo 
+
+•	Введите в созданный домен машину HQ-CLI 
+
+•	Создайте 5 пользователей для офиса HQ: имена пользователей формата hquser№ (например hquser1, hquser2 и т.д.) 
+
+•	Создайте группу hq, введите в группу созданных пользователей 
+
+•	Убедитесь, 	что 	пользователи 	группы 	hq 	имеют 	право аутентифицироваться на HQ-CLI  
+
+• Пользователи группы hq должны иметь возможность повышать привилегии для выполнения ограниченного набора команд: cat, grep, id. Запускать другие команды с повышенными привилегиями пользователи группы права не имеют. 
+
+</details>
+
+<details>
+<summary><strong>Создание контрлера домена </strong></summary>
+
 <br/>
 
 Прописать в файле /etc/hosts ip, доменное имя (полностью) и имя сервера. Как это должно выглядеть:
 ```
 192.168.0.2 br-srv.au-team.irpo br-srv
+```
 
+Удаляем старую папку /etc/resolv.conf и создаём её заново:
+
+```
+unlink /etc/resolv.conf
+```
+
+```
+nano /etc/resolv.conf
+```
+После, прописываем следующие занчениея:
+
+```
+nameserver 8.8.8.8
+
+nameserver 1.1.1.1
+
+search br-srv.au-team.irpo
 ```
 
 </br>
 
+```
 apt install samba samba-dsdb-modules samba-vfs-modules acl attr winbind libpam-winbind libnss-winbind krb5-config krb5-user libpam-krb5 smbclient dnsutils net-tools
+```
 
+Указываем следующие значения, в следующих трёх появившихся полях, по порядку:
+
+```
 AU-TEAM.IRPO
+```
 
+```
 br-srv.au-team.irpo
-
+```
+```
 br-srv.au-team.irpo
+```
 
+После установки пакетов нам нужно остановить и запретить для автозапуска следующие службы:
+
+```
+systemctl disable --now smbd nmbd winbind
+```
+
+Все эти функции на себя возьмет служба samba-ad-dc. Если мы не выключим перечисленные сервисы, будет конфликт и ошибка в работе. По идее, они будут заблокированы автоматически (masked0, но лишняя осторожность не повредит.
+
+```
 samba-tool domain provision 
+```
+Удаление/перенос класического конфигурационного фала smb.conf, иначе так же может возникнуть ошибка:
+
+```
+mv /etc/samba/smb.conf /etc/samba/smb.conf.backup
+```
 
 👉 создаёт контроллер домена
 
@@ -1520,18 +1584,24 @@ samba-tool domain provision
 
 </br>
 
+```
 systemctl stop samba-ad-dc smbd nmbd winbind 2>/dev/null
-
+```
+```
 apt purge samba samba-common-bin samba-ad-dc winbind -y
- 
+```
+```
 apt autoremove -y
-
+```
+```
 rm -rf /etc/samba
-
+```
+```
 rm -rf /var/lib/samba
-
+```
+```
 rm -rf /var/cache/samba
-
+```
 Проверяем имя машины на соответствие нужному доменному имени
 
 Проверяем nano /etc/hosts на наличи ip машины своему домену, если нет, прописываем слудующее:
@@ -1540,22 +1610,122 @@ rm -rf /var/cache/samba
 
 Проверяем nano /etc/resolv.conf на наличие локального ip, если нет, прописываем:
 
-nameserver 127.0.0.1
-
+```
+nameserver 192.168.0.2
+```
 Сохроням и пробуем установить снова
 
 </details>
 
 </br>
 
-systemctl restart samba
+Убираем оригинальный конфигурационный файл krb5.conf и заменяем его тем, что сформировала утилита samba-tool:
 
+```
+mv /etc/krb5.conf /etc/krb5.conf.backup
+```
+
+```
+cp /var/lib/samba/private/krb5.conf /etc/krb5.conf
+```
+
+Открываем конфигурационный файл resolv.conf:
+
+```
+nano /etc/resolv.conf
+```
+
+Удаляем старую запись DNS сервера и заменяем на запись локального сервера:
+
+```
+nameserver 192.168.0.2
+```
+Перезапускаем сервис и включаем его для автозапуска:
+
+```
+systemctl restart samba
+```
+
+```
+systemctl enable --now samba-ad-dc
+```
+
+Проверьте статус, если всё работет продолжайте дальше. (Позже посмотрю в техе на ошибки и если найду таковые постараюсь исправить и внести изменения).
+
+<details>
+<summary><strong>Проверка работы домена и его обнаружение (не обязательно если уверены в работе)</strong></summary>
+
+Убедимся, что сервер возвращает правильный IP при запросе адреса по домену:
+
+```
+host -t A dmosk.local
+```
+
+Должен вернуть - au-team.irpo has address 192.168.0.2 
 Пользователи и группа
 
-for i in {1..5}; do samba-tool user create hquser$i P@ssw0rd; done
-samba-tool group add hq
+Проверяем dns запись для имени контроллера домена:
 
+```
+host -t A au-team.irpo
+```
+Должен вернуть - au-team.irpo has address 192.168.0.2
+
+Также DNS должен правильно вернуть SRV запись для kerberos:
+
+```
+host -t SRV _kerberos._udp.au-team.irpo
+```
+Должен вернуть - _ldap._tcp.au-team.irpo has SRV record 0 100 389 br-rtr.au-team.irpo
+
+Нужно проверить появление тикета в системе
+
+```
+klist
+```
+Должен вывести: 
+
+<br/>
+
+Ticket cache: FILE:/tmp/krb5cc_0
+Default principal: administrator@AU-TEAM.IRPO
+
+Valid starting     Expires            Service principal
+12/17/25 16:14:12  12/18/25 02:14:12  krbtgt/AU-TEAM.IRPO@AU-TEAM.IRPO
+        renew until 12/18/25 16:14:05
+
+</br>
+
+Так же попытаться аунтифицироваться через администратора
+
+```
+kinit administrator
+```
+
+Вывод - Warning: Your password will expire in 41 days on Wed Jan 28 15:08:31 2026
+
+</details>
+
+<details>
+<summary><strong>Создание полльзователей</strong></summary>
+
+Создание пользователей от 1 до 5:
+
+```
+for i in {1..5}; do samba-tool user create hquser$i P@ssw0rd; done
+```
+
+Создание группы hq
+
+```
+samba-tool group add hq
+```
+
+Добавление пользователей в группу hq
+
+```
 for i in {1..5}; do samba-tool group addmembers hq hquser$i; done
+```
 
 Sudo ограничения
 
