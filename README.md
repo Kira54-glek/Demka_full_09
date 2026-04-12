@@ -1735,6 +1735,94 @@ visudo
 
 %hq ALL=(ALL) NOPASSWD: /bin/cat, /bin/grep, /usr/bin/id
 
+<details>
+<summary><strong>Настройка HQ-CLI на домен</strong></summary>
+
+Первым делом, необходимо ввести HQ-CLI в домен, это делается достаточно просто. Заходим в /etc/resolv.conf и прописываем следующие занчения:
+
+```
+nameserver 192.168.0.2
+
+search au-team.irpo
+```
+
+После устанавливаем  <code>realm </code>, он понадобится нам в большинстве случаев.
+
+```
+apt install realmd sssd sssd-tools libnss-sss libpam-sss adcli samba-common-bin oddjob oddjob-mkhomedir packagekit -y
+```
+
+Проверяем нахождение домена на HQ-CLI
+
+```
+realm discover au-team.irpo
+```
+
+Добавляем дополнительные права пользоватлею HQ-CLI для возможности пользоваться командами <code>realm</code> без пользования <code>root</code> прав. Для этого переходим в каталог ```nano /home/usr1/.bashrc``` и прописываем следующие значения:
+
+```
+export PATH=$PATH:/usr/sbin
+```
+
+Применяем изминения:
+
+```
+source ~/.bashrc
+```
+
+После этого, нужно настройить права доступа группы hq. Для этого, разрешаем группе hq вход:
+
+```
+realm permit -g hq
+```
+
+После, прописываем права доступа на hq-cli в каталоге ```nano /etc/sssd/sssd.conf``` :
+
+```
+[sssd]
+services = nss, pam
+domains = au-team.irpo
+
+[domain/au-team.irpo]
+id_provider = ad
+auth_provider = ad
+access_provider = simple
+simple_allow_groups = hq
+```
+
+Задаём права "только для чтения" на этот файл:
+
+```
+chmod 600 /etc/sssd/sssd.conf
+```
+
+Рестартим:
+
+```
+systemctl restart sssd
+```
+
+Включаем вход через GUI (PAM):
+
+```
+pam-auth-update
+```
+
+Перезапускаем вход:
+
+```
+systemctl restart sssd
+```
+
+```
+systemctl restart display-manager
+```
+
+Ошибка - не может найти пользователей на HQ-СLI, не может зайти в пользователя, решить.
+
+</details>
+
+
 ## Задание 2 RAID (HQ-SRV)
 
 <br/>
