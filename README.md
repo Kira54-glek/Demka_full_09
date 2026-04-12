@@ -1493,6 +1493,14 @@ timedatectl set-timezone Asia/Tomsk
 
 <br/>
 
+Прописать в файле /etc/hosts ip, доменное имя (полностью) и имя сервера. Как это должно выглядеть:
+```
+192.168.0.2 br-srv.au-team.irpo br-srv
+
+```
+
+</br>
+
 apt install samba samba-dsdb-modules samba-vfs-modules acl attr winbind libpam-winbind libnss-winbind krb5-config krb5-user libpam-krb5 smbclient dnsutils net-tools
 
 AU-TEAM.IRPO
