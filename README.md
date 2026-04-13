@@ -116,6 +116,8 @@
 ### ISP
 ```
 hostnamectl set-hostname isp.au-team.irpo
+```
+```
 newgrp
 ```
 <br/>
@@ -123,6 +125,8 @@ newgrp
 ### HQ-RTR
 ```
 hostnamectl set-hostname hq-rtr.au-team.irpo
+```
+```
 newgrp
 ```
 <br/>
@@ -130,6 +134,8 @@ newgrp
 ### BR-RTR
 ```
 hostnamectl set-hostname br-rtr.au-team.irpo
+```
+```
 newgrp
 ```
 <br/>
@@ -137,6 +143,8 @@ newgrp
 ### HQ-SRV
 ```
 hostnamectl set-hostname hq-srv.au-team.irpo
+```
+```
 newgrp
 ```
 <br/>
@@ -144,6 +152,8 @@ newgrp
 ### HQ-CLI
 ```
 hostnamectl set-hostname hq-cli.au-team.irpo
+```
+```
 newgrp
 ```
 <br/>
@@ -151,6 +161,8 @@ newgrp
 ### BR-SRV
 ```
 hostnamectl set-hostname br-srv.au-team.irpo
+```
+```
 newgrp
 ```
 <br/>
