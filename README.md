@@ -445,7 +445,7 @@ iptables-save > /etc/iptables/rules.v4
 ```
 </br>
 
-<summary><strong><code>Либо настройка через nftaables (если не работает, вернуться к другому варианту)</code></strong></summary> 
+<summary><strong><code>Либо настройка через nftables </code></strong></summary> 
 
   ```
 nano /etc/nftables.conf
@@ -458,7 +458,9 @@ table ip nat {
     }
 }
  ```
- 
+
+###Если не работает, презагрузите машину, на которую пытаетесь раздать интернет, либо, возвращайтесь к другому варианту.
+
 > **`ens192`** - интерфейс с которого приходит **интернет**
 > 
 > Для проверки можно использовать команду: **`iptables –L –t nat`** - должны высветится в Chain POSTROUTING две настроенные подсети  
