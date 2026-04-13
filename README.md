@@ -512,7 +512,11 @@ table ip nat {
 **1.** Создаём sshuser следующими командами:
 ```
 useradd sshuser -u 2026
+```
+```
 passwd sshuser
+```
+```
 P@ssw0rd
 ```
 <br/>
@@ -539,7 +543,11 @@ sshuser ALL=(ALL) NOPASSWD:ALL
 **4.** Создаем и задаем необходимые права на домашнюю папку
 ```
 mkdir /home/sshuser
+```
+```
 chown sshuser:sshuser /home/sshuser
+```
+```
 chmod 700 /home/sshuser
 ```
 <br/>
@@ -554,8 +562,12 @@ chmod 700 /home/sshuser
 **1.** Создаём **`net_admin`**, следующими командами, но уже без `-u 1010` и с новым паролем:
 ```
 useradd net_admin
+```
+```
 passwd net_admin
-P@$$word
+```
+```
+P@ssw0rd
 ```
 <br/>
 
@@ -578,7 +590,11 @@ net_admin ALL=(ALL) NOPASSWD:ALL
 **4.** Создаем и задаем необходимые права на домашнюю папку
 ```
 mkdir /home/net_admin
+```
+```
 chown net_admin:net_admin /home/net_admin
+```
+```
 chmod 700 /home/net_admin
 ```
 <br/>
