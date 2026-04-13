@@ -852,8 +852,8 @@ conf t
 router ospf
   passive-interface default
   router-id 1.1.1.1
-  network 172.16.0.0/30 area 0
-  network 192.168.100.0/26 area 1
+  network 172.16.0.0/28 area 0
+  network 192.168.100.0/27 area 1
   network 192.168.200.0/28 area 2
   area 0 authentication
 exit
@@ -881,7 +881,7 @@ int gre1
 
 - `network 192.168.0.0/27 area 3`
 
-- `network 172.16.0.0/30 area 0`
+- `network 172.16.0.0/28 area 0`
 
 ```
 conf t
@@ -889,7 +889,7 @@ router ospf
   passive-interface default
   router-id 2.2.2.2
   network 192.168.0.0/27 area 3
-  network 172.16.0.0/30 area 0
+  network 172.16.0.0/28 area 0
   area 0 authentication
 exit
 
@@ -963,7 +963,7 @@ After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/sbin/ip route add 192.168.100.0/26 via 172.16.0.1 dev gre1
+ExecStart=/sbin/ip route add 192.168.100.0/27 via 172.16.0.1 dev gre1
 ExecStart=/sbin/ip route add 192.168.200.0/28 via 172.16.0.1 dev gre1
 RemainAfterExit=yes
 
@@ -1011,7 +1011,7 @@ systemctl start iproute.service
 ### Настройка динамической сетевой трансляции на `HQ-RTR`
 ```
 apt-get install iptables iptables-persistent –y
-iptables –t nat –A POSTROUTING –s 192.168.100.0/26 –o ens192 –j MASQUERADE
+iptables –t nat –A POSTROUTING –s 192.168.100.0/27 –o ens192 –j MASQUERADE
 iptables –t nat –A POSTROUTING –s 192.168.200.0/28 –o ens192 –j MASQUERADE
 netfilter-persistent save
 systemctl restart netfilter-persistent  
@@ -1026,8 +1026,25 @@ systemctl restart netfilter-persistent
 ```
 > Для того, чтобы **сбросить** настройку *nat*, можно использовать команду **`iptables -t nat -F`**
 
+
+
 </br>
 
+</details>
+
+<details>
+<summary><strong>Альтарнативная настройка сетевой трансляции через <code> nftables </code> </strong></summary>
+
+### ВНИМАНИЕ! Если у вас не вышло настроить <code> NAT </code> через <code> nftables </code>, возвращайтесь к первому варианту!
+
+```
+table ip nat {
+    chain postrouting {
+        type nat hook postrouting priority 100; policy accept;
+        oifname "ens192" masquerade
+    }
+}
+```
 </details>
 
 </br>
@@ -1111,7 +1128,7 @@ systemctl enable isc-dhcp-server
 
 ### Настройка DNS для офисов HQ и BR  
 - Основной DNS-сервер реализован на HQ-SRV.  
-- Сервер должен обеспечивать разрешение имён в сетевые адреса устройств и обратно в соответствии с таблицей 2  
+- Сервер должен обеспечивать разрешение имён в сетевые адреса устройств и обратно в соответствии с таблицей 3  
 - В качестве DNS сервера пересылки используйте любой общедоступный DNS сервер  
 
 </details>
@@ -1189,12 +1206,12 @@ nano /etc/bind/named.conf.options
 ```
 
 ```
-  listen-on { 127.0.0.1; 192.168.100.0/26; 192.168.200.0/28; 192.168.0.0/27; 172.16.0.0/30; };
+  listen-on { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/27; 172.16.0.0/30; };
   forwarders { 127.0.0.1; 8.8.8.8; 192.168.100.62; 8.8.4.4; };
   recursion yes;
-  allow-query { 127.0.0.1; 192.168.100.0/26; 192.168.200.0/28; 192.168.0.0/27; 172.16.0.0/30; };
-  allow-query-cache { 127.0.0.1; 192.168.100.0/26; 192.168.200.0/28; 192.168.0.0/27; 172.16.0.0/30; };
-  allow-recursion { 127.0.0.1; 192.168.100.0/26; 192.168.200.0/28; 192.168.0.0/27; 172.16.0.0/30; };
+  allow-query { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/27; 172.16.0.0/30; };
+  allow-query-cache { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/27; 172.16.0.0/28; };
+  allow-recursion { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/27; 172.16.0.0/28; };
   dnssec-validation auto;
 ```
 <br/>
@@ -1488,7 +1505,7 @@ timedatectl set-timezone Asia/Tomsk
 
 <br/>
 
-ДОРАБОАТЬ
+ДОРАБОТАТЬ
 ## Задание 1
 
 <details>
