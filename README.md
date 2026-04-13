@@ -1536,10 +1536,10 @@ timedatectl set-timezone Asia/Tomsk
 <br/>
 
 ДОРАБОТАТЬ
-## Задание 1
+### Задание 1
 
 <details>
-<summary><strong>Описание задания: </strong></summary>
+<summary><strong> ## Описание задания: </strong></summary>
 
 Настройте контроллер домена Samba DC на сервере BR-SRV: 
 
@@ -1699,6 +1699,7 @@ systemctl enable --now samba-ad-dc
 
 Проверьте статус, если всё работет продолжайте дальше. (Позже посмотрю в техе на ошибки и если найду таковые постараюсь исправить и внести изменения).
 
+
 <details>
 <summary><strong>Проверка работы домена и его обнаружение (не обязательно если уверены в работе)</strong></summary>
 
@@ -1753,6 +1754,8 @@ kinit administrator
 
 </details>
 
+</details>
+
 <details>
 <summary><strong>Создание полльзователей</strong></summary>
 
@@ -1774,13 +1777,47 @@ samba-tool group add hq
 for i in {1..5}; do samba-tool group addmembers hq hquser$i; done
 ```
 
-Sudo ограничения
+Sudo ограничения:
 
+<details>
+<summary><strong>visudo</strong></summary>
+
+
+
+```
+apt install sudo -y
+```
+
+```
 visudo
+```
 
 Добавить:
 
+```
 %hq ALL=(ALL) NOPASSWD: /bin/cat, /bin/grep, /usr/bin/id
+```
+
+</details>
+
+<details>
+<summary><strong>Конфиги <code>/etc/sudoers </code>/</strong></summary>
+
+Переходим в конфиги:
+
+```
+nano /etc/sudoers
+```
+
+Прописываем правило:
+
+```
+%hq ALL=(ALL) NOPASSWD: /bin/cat, /bin/grep, /usr/bin/id
+```
+
+</details>
+
+</details>
 
 <details>
 <summary><strong>Настройка HQ-CLI на домен</strong></summary>
@@ -1865,10 +1902,73 @@ systemctl restart sssd
 systemctl restart display-manager
 ```
 
-Ошибка - не может найти пользователей на HQ-СLI, не может зайти в пользователя, решить.
+После, прописывем:
+
+```
+hquser1@au-team.irpo
+```
+
+Вводим пароль в появившемся окне:
+
+```
+P@ssw0rd
+```
+
+<details>
+<summary><strong>Если не получается зайти на пользователя </strong></summary>
+
+## Если не получается зайти на пользователя из начального экрана, необходимо проверить, что это за ошибка. Для этого заходим в уже имеющегося, прописывам: 
+
+```
+su - hquser1@au-team.irpo
+```
+
+Если вывод - <code> System eror </code>, то делаем следующее:
+
+```
+systemctl stop sssd
+```
+
+```
+rm -f /etc/krb5.keytab
+```
+
+```
+rm -rf /var/lib/sss/db/*
+```
+
+```
+realm leave au-team.irpo --remove
+```
+
+И переподключаемся заново:
+
+```
+realm join au-team.irpo -U Administrator
+```
+
+```
+realm permit -g hq
+```
+
+```
+systemctl restart sssd
+```
+
+После, проверяем через: 
+```
+su - hquser1@au-team.irpo 
+```
+
+## Должно появиться следующее сообщение:
+
+<img width="733" height="95" alt="изображение" src="https://github.com/user-attachments/assets/3403a5ff-d63b-4ee6-b1d8-f9e940a01bc2" />
 
 </details>
 
+</details>
+
+Ошибка - нет возможности активировать sudo с пользователя hq. Исправть
 
 ## Задание 2 RAID (HQ-SRV)
 
