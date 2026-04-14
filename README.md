@@ -230,7 +230,7 @@ allow-hotplug ens192
 iface ens192 inet static
 address 192.168.0.2/28
 gateway 192.168.0.1
-dns-nameservers 192.168.100.62 192.168.0.2
+dns-nameservers 192.168.100.2 192.168.0.2
 dns-search au-team.irpo
 ```
 
@@ -239,7 +239,7 @@ dns-search au-team.irpo
 ```
 allow-hotplug ens192
 iface ens192 inet static
-address 192.168.100.62/27
+address 192.168.100.2/27
 gateway 192.168.100.1
 ```
 
