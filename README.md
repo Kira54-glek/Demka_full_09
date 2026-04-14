@@ -12,14 +12,22 @@
 >
 > ```
 > systemctl stop NetworkManager
+> ```
+> ```
 > systemctl disable NetworkManager
+> ```
+> ```
 > systemctl mask NetworkManager
 > ```
+> 
+> 
 ></br>
 >
 > На всех устройствах, кроме **ISP**:
 >```
 >nano /etc/resolv.conf
+>```
+>```
 >nameserver 77.88.8.8
 >nameserver 1.1.1.1
 >```
@@ -29,7 +37,23 @@
 >```
 > echo net.ipv4.ip_forward=1 > /etc/sysctl.conf
 >```
-></br> 
+>
+>```
+>echo net.ipv4.conf.default.rp_filter = 0 > /etc/sysctl.conf
+>```
+>
+>```
+> echo net.ipv4.conf.all.rp_filter = 0 > /etc/sysctl.conf
+>```
+> 
+> После, приминем настройки
+>
+> ```
+> sysctl --system
+>```
+> 
+></br>
+>
 >
 > **Сурс** листы везде:
 > ```
@@ -239,7 +263,7 @@ dns-search au-team.irpo
 ```
 allow-hotplug ens192
 iface ens192 inet static
-address 192.168.100.2/27
+address 192.168.100.15/27
 gateway 192.168.100.1
 ```
 
@@ -961,7 +985,7 @@ vtysh
 После создания влана настраиваем маршрут для подсетей (чтобы они видели друг друга)  
 На роутере *HQ-RTR* настройка выглядит так:
 ```
-sudo nano /etc/systemd/system/iproute.service
+nano /etc/systemd/system/iproute.service
 ```
 
 <br/>
@@ -985,8 +1009,10 @@ WantedBy=multi-user.target
 
 На роутере *BR-RTR* создаем тот же файли настраивеим:
 ```
-sudo nano /etc/systemd/system/iproute.service
+nano /etc/systemd/system/iproute.service
+```
 Для HQ-RTR:
+```
 [Unit]
 Description=iproute
 After=network.target
@@ -1041,22 +1067,34 @@ systemctl start iproute.service
 ### Настройка динамической сетевой трансляции на `HQ-RTR`
 ```
 apt-get install iptables iptables-persistent –y
+```
+```
 iptables –t nat –A POSTROUTING –s 192.168.100.0/27 –o ens192 –j MASQUERADE
+```
+```
 iptables –t nat –A POSTROUTING –s 192.168.200.0/28 –o ens192 –j MASQUERADE
+```
+```
 netfilter-persistent save
+```
+```
 systemctl restart netfilter-persistent  
 ```
 ### Настройка динамической сетевой трансляции на `BR-RTR`
 
 ```
 apt-get install iptables iptables-persistent –y
+```
+```
 iptables –t nat –A POSTROUTING –s 192.168.0.0/27 –o ens192 –j MASQUERADE
+```
+```
 netfilter-persistent save
+```
+```
 systemctl restart netfilter-persistent  
 ```
 > Для того, чтобы **сбросить** настройку *nat*, можно использовать команду **`iptables -t nat -F`**
-
-
 
 </br>
 
@@ -1120,7 +1158,7 @@ nano /etc/dhcp/dhcpd.conf
 ```
 subnet 192.168.200.0 netmask 255.255.255.240 {
   range 192.168.200.2 192.168.200.14;
-  option domain-name-servers 192.168.100.62;
+  option domain-name-servers 192.168.100.15;
   option domain-name "au-team.irpo";
   option routers 192.168.200.1;
   default-lease-time 600;
