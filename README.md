@@ -37,20 +37,22 @@
 >```
 > echo net.ipv4.ip_forward=1 > /etc/sysctl.conf
 >```
->
->```
->echo net.ipv4.conf.default.rp_filter = 0 > /etc/sysctl.conf
->```
->
->```
-> echo net.ipv4.conf.all.rp_filter = 0 > /etc/sysctl.conf
->```
 > 
 > После, приминем настройки
 >
 > ```
 > sysctl --system
->```
+> ```
+>
+> ## Если OSPF в задании 7 не заработал (не уверен в легальности, использовать на свой страх и риск)
+>
+>  ```
+> echo net.ipv4.conf.default.rp_filter = 0 > /etc/sysctl.conf
+> ```
+>
+> ```
+> echo net.ipv4.conf.all.rp_filter = 0 > /etc/sysctl.conf
+> ```
 > 
 ></br>
 >
