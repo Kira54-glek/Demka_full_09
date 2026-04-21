@@ -1746,7 +1746,7 @@ systemctl enable --now samba-ad-dc
 Убедимся, что сервер возвращает правильный IP при запросе адреса по домену:
 
 ```
-host -t A dmosk.local
+host -t A au-team.irpo
 ```
 
 Должен вернуть - au-team.irpo has address 192.168.0.2 
@@ -2012,21 +2012,134 @@ su - hquser1@au-team.irpo
 
 ## Задание 2 RAID (HQ-SRV)
 
+<details>
+<summary><strong> ## Настройка RAID 0 </strong></summary>
+
+
 <br/>
 
+Проверяем наличие дисков на машине:
+
+```
+lsblk
+```
+
+Устанавливаем необходимую утелиту:
+
+```
 apt install mdadm -y
+```
 
-mdadm --create /dev/md0 --level=0 --raid-devices=2 /dev/sdb /dev/sdc
+Компелируем диски в рейд:
 
-👉 RAID0
+```
+mdadm --create --verbose /dev/md0 --level=0 --raid-devices=2 /dev/sdb /dev/sdc
+```
 
+Создаём файл для коректного сюора рейда и заночим изминения:
+
+```
+mkdir -p /etc/mdadm
+```
+
+```
+mdadm --detail --scan --verbose >> /etc/mdadm.conf
+```
+
+Разграничеваем пространстов диска:
+
+```
 mkfs.ext4 /dev/md0
+```
 
+Создаём точку монтирования:
+
+```
 mkdir /raid
+```
 
-mount /dev/md0 /raid
+Узнаём UUID масива, для внесения изминений в /etc/fstab
 
-echo "/dev/md0 /raid ext4 defaults 0 0" >> /etc/fstab
+```
+blkid /dev/md0
+```
+
+Прверяем, создался ли масив:
+
+<img width="680" height="54" alt="изображение" src="https://github.com/user-attachments/assets/60644be5-5e7d-4a0e-84f0-701f1fedd127" />
+
+
+
+После, переходим в конфигурационный файл mdadm.conf и смотрим UUID масива (он будет отличаться от предыдущего)
+
+```
+nano /etc/mdadm.conf
+```
+
+Создайте скриншот UUID и сохраните на устройство, что бы была возможность вернуться к нему позже
+
+Теперь записываем его файл /etc/fstab:
+
+```
+nano /etc/fstab
+```
+
+Вы должны привести его к такому виду:
+
+<img width="573" height="50" alt="изображение" src="https://github.com/user-attachments/assets/b69f8e4e-7b3d-445b-af86-d96e7ee9d3c4" />
+
+После внесения изминений, нужно перезагрузить демона:
+
+```
+systemctl daemon-reload
+```
+
+Монтируем раздел:
+
+```
+mount -a
+```
+
+В завершение, обновите <code>initramfs </code> для обновления информации о запуске масива.
+
+```
+update-initramfs -u
+```
+
+</details>
+
+<details>
+<summary><strong> ## Если в работе возникли ошибки (полное удаление RAID) </strong></summary>
+
+Удаляем точку монтирования:
+
+```
+umount /raid
+```
+
+Останавливаем RAID:
+
+```
+mdadm --stop /dev/md0
+```
+
+Очищаем суперблоки дисков:
+
+```
+mdadm --zero-superblock /dev/sdb
+```
+
+```
+mdadm --zero-superblock /dev/sdc
+```
+
+Проверяем:
+
+```
+lsblk
+```
+
+</details>
 
 <br/>
 
