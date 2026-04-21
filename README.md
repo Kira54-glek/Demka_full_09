@@ -9,7 +9,8 @@
 
 > [!WARNING]
 > ## ПРЕДНАСТРОЙКА
->
+> <details>
+> 
 > ```
 > systemctl stop NetworkManager
 > ```
@@ -69,6 +70,8 @@
 >```
 >apt update
 >```
+>
+> </details>
 </br>
 
 <table>
@@ -2146,48 +2149,254 @@ lsblk
 ## ЗАДНИЕ 3 NFS
 
 <br/>
-HQ-SRV
 
+<details>
+<summary><strong> Настройка на HQ-SRV </strong></summary>
+
+Первым делом устанавливаем необходимую утилиту:
+
+```
 apt install nfs-kernel-server -y
+```
 
+После создаём необходимый каталог:
+
+```
 mkdir -p /raid/nfs
+```
+Выыдаём права на его чтение:
 
-echo "/raid/nfs 192.168.200.0/28(rw,sync)" >> /etc/exports
+```
+chmod 777 /raid/nfs
+```
 
+Переходим в конфиги экспорта:
+
+```
+nano /etc/exports
+```
+
+И прописываем в нём следующее значение (ip адресс устройства должен быть точным):
+
+```
+/raid/nfs  192.168.200.0/28(rw,sync,no_subtree_check)
+```
+
+Или
+
+```
+echo "/raid/nfs 192.168.200.3/28(rw,sync,no_subtree_check)" >> /etc/exports
+```
+
+## Если дальше по заданию не заработает, укажите точный IP
+
+Применям изминения:
+
+```
 exportfs -a
+```
 
+Включаем сервис:
+
+```
+systemctl enable --now nfs-server
+```
+
+Перезапускаем:
+
+```
 systemctl restart nfs-kernel-server
+```
+</details>
 
-HQ-CLI
+<details>
+<summary><strong> Настройка на HQ-CLI </strong></summary>
 
+Устанавливаем утилиту:
+
+```
 apt install autofs -y
+```
 
-echo "/mnt /etc/auto.nfs" >> /etc/auto.master
+Проверяем соедиение:
 
-echo "nfs -rw 192.168.100.62:/raid/nfs" >> /etc/auto.nfs
+```
+showmount -e 192.168.100.15
+```
 
-systemctl restart autofs
+Должени быть следующий результат:
+
+<img width="406" height="73" alt="изображение" src="https://github.com/user-attachments/assets/0fde90d6-245e-4afd-825e-45421a62880f" />
+
+Далее, создаём папку для монтирования:
+
+```
+mkdir -p /mnt/nfs
+```
+
+Переходим к автозапуску при загрузке системы:
+
+```
+nano /etc/fstab
+```
+
+Добавляем следующую строку в файл:
+
+```
+192.168.100.15:/raid/nfs  /mnt/nfs  nfs  defaults,_netdev  0  0
+```
+
+Или
+
+```
+echo "192.168.100.15:/raid/nfs  /mnt/nfs  nfs  defaults,_netdev  0  0" >> /etc/fstab
+```
+
+Производим монтирование:
+
+```
+mount -a
+```
+
+Проверяем результат, должен быть вывод как на рисунке:
+
+```
+df -h | grep nfs
+```
+
+<img width="531" height="66" alt="изображение" src="https://github.com/user-attachments/assets/f95864c9-e5cb-4b4d-93b3-2f82a4336ad0" />
+
+</details>
+
+<details>
+<summary><strong> Проверка работоспособности </strong></summary>
+
+Помимо основных проверок, чт обыли сделаны выше:
+
+```
+showmount -e 192.168.100.15
+```
+
+```
+df -h | grep nfs
+```
+
+Создайте тестовый файл на клиенте в директорию, которую вы смонтированили:
+
+```
+touch /mnt/nfs/testfile
+```
+
+Полсе чего проверьте его наличие на сервере:
+
+```
+ls -l /raid/nfs/testfile
+```
+
+Результат должен быть следующим:
+
+
+<img width="521" height="75" alt="изображение" src="https://github.com/user-attachments/assets/1bc0540c-64a5-4dea-84d6-b67ff2a7de59" />
+
+
+</details>
+
+
 <br/>
 
-## Задание 4. NTP (ISP)
+### Задание 4 - NTP (ISP)
+
+<details>
+<summary><strong> Настройка на ISP </strong></summary>
 
 <br/>
 
+Устанавливаем необходимую утилиту:
+
+```
 apt install chrony -y
+```
 
+Переходим в конфиг:
+
+```
 nano /etc/chrony/chrony.conf
-
+```
 Добавить:
 
+```
 server pool.ntp.org iburst
-
-local stratum 5
-
 allow 0.0.0.0/0
+local stratum 5
+```
 
+На месте сервера указываем свой внешний ntp
+
+Перезапускаем утилиту:
+
+```
 systemctl restart chrony
+```
 
-👉 клиенты: HQ-SRV, HQ-CLI, BR-RTR, BR-SRV — указать IP ISP
+Проверяем что ISP синхронизировался с внешним мирои:
+
+```
+chronyc sources -v
+```
+
+</details>
+
+<details>
+<summary><strong> Настройка на остальных машинах (HQ-SRV, HQ-CLI, BR-RTR, BR-SRV) </strong></summary>
+
+Так же производим установку утилиты:
+
+```
+apt install chrony -y
+```
+
+Редактируем конфиг (настраиваем ip в зависимости от подсети):
+
+```
+nano /etc/chrony/chrony.conf
+```
+
+```
+server 172.16.1.1 iburst
+```
+
+```
+server 172.16.2.1 iburst
+```
+
+Приминяем настройки:
+
+```
+systemctl restart chrony
+```
+
+</details>
+
+<details>
+<summary><strong> Проверка работы </strong></summary>
+
+Прописываем следующие команды:
+
+```
+chronyc sources
+```
+
+```
+chronyc tracking
+```
+
+Результат должен быть следующий:
+
+<img width="705" height="384" alt="изображение" src="https://github.com/user-attachments/assets/dabaa33d-0a04-465d-a5a1-25e5ec8e3a44" />
+
+
+  
+</details>
 
 <br/>
 
