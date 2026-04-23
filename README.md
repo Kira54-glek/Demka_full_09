@@ -2404,25 +2404,159 @@ chronyc tracking
 
 <br/>
 
+<details>
+<summary><strong> Преднастройка на машинах (HQ-SRV, HQ-CLI, BR-RTR, HQ-RTR) </strong></summary>
+
+Первым делом устанавливаем SSH:
+
+```
+apt install ssh -y
+```
+
+Полсе переходим в конфигруации и прописываем два правила:
+
+```
+nano /etc/ssh/sshd_config
+```
+
+```
+Port 2026
+
+PermitRootLogin yes
+```
+
+Перезапускаем SSH:
+
+```
+systemctl restart ssh
+```
+
+## НА BR-SRV
+
+Переходим а файл <code> /etc/hosts </code>:
+
+```
+nano /etc/hosts
+```
+
+Прописываем адресацию, для того, что бы сервер мог обнаружить устройства.
+
+```
+192.168.100.15 HQ-SRV
+
+192.168.200.0 HQ-CLI ( if no jobs -> 192.168.200.ip_hq-cli)
+
+172.16.1.2 HQ-RTR
+
+172.16.2.2 BR-RTR
+```
+
+Посел так же устанавливаем SSH на BR-SRV:
+
+```
+apt install ssh -y
+```
+
+Генерируем ключ (нажимаем везщде Enter):
+
+```
+ssh-keygen -t rsa
+```
+
+Далее, производим копирование ключа на устройства, везде нужно будет ввести пароль P@ssw0rd:
+
+```
+ssh-copy-id -p 2026 root@192.168.100.15
+```
+
+```
+ssh-copy-id -p 2026 root@192.168.200.0 (if no jobs -> 192.168.200.ip_ha-cli)
+```
+
+```
+ssh-copy-id -p 2026 root@<172.16.1.2
+```
+
+```
+ssh-copy-id -p 2026 root@172.16.2.2
+```
+
+Проверьте подключенеиме.
+
+```
+ssh root@192.168.100.15
+```
+
+```
+ssh root@192.168.200.3
+```
+
+```
+ssh root@172.16.1.2
+```
+
+```
+ssh root@172.16.2.2
+```
+
+</details>
+
+
+<details>
+<summary><strong> Настройка инвентаря Ansible на BR-SRV </strong></summary>
+
+Устанавливаем Ansible:
+
+```
 apt install ansible -y
+```
 
+Создаём необходимую директорию:
+
+```
 mkdir -p /etc/ansible
+```
 
+Переходим в настройку хостов:
+
+```
 nano /etc/ansible/hosts
+```
 
-[hq]
+Прописываме настроку хостов:
 
-192.168.100.62
+```
+HQ-SRV ansible_host=192.168.100.15 ansible_port=2026
+HQ-CLI ansible_host=192.168.200.3  ansible_port=2026
+HQ-RTR ansible_host=172.16.1.2    ansible_port=2026
+BR-RTR ansible_host=172.16.2.2    ansible_port=2026
+```
 
-192.168.200.2
+Отключаем проверку подлиности, рнонходим в конфигурации Ansible:
 
-172.16.4.2
+```
+nano /etc/ansible/ansible.cfg
+```
 
-[br]
+```
+[defaults]
+inventory = /etc/ansible/hosts
+host_key_checking = False
+remote_user = root
+```
 
-172.16.5.2
+Запускаем проверку:
 
+```
 ansible all -m ping
+```
+
+Результат должен быть следующим:
+
+<img width="1294" height="463" alt="изображение" src="https://github.com/user-attachments/assets/4d45f50d-a034-4614-bbe7-219c719836dc" />
+
+
+</details>
 
 <br/>
 
