@@ -2564,33 +2564,106 @@ ansible all -m ping
 
 <br/>
 
+<details>
+<summary><strong> Настройка DOCKER на BR-SRV </strong></summary>
+
+Установка
+
+```
 apt install docker.io docker-compose -y
+```
 
-docker load < site_latest.tar
+Создание директории монтирования
 
-docker load < mariadb_latest.tar
+```
+mkdir -p /mnt/iso
+```
 
+Монтирование
+
+```
+mount /dev/sr0 /mnt/iso
+```
+
+Перехол в точку монтирования
+
+```
+cd /mnt/iso/docker
+```
+
+Загрузка необходимых образов
+
+```
+docker load -i /mnt/iso/docker/site_latest.tar
+```
+
+```
+docker load -i /mnt/iso/docker/mariadb_latest.tar
+```
+
+Проверка наличия образов
+
+```
+docker images
+```
+
+Создание рабочей лиректории и файла конфигурации
+
+```
+mkdir -p /opt/testapp && cd /opt/testapp
+```
+
+Перехол в файл конфигурации
+
+```
 nano docker-compose.yml
+```
 
-version: '3'
+Конфиг
+
+```
+version: '3.8'
 
 services:
   db:
-    image: mariadb_latest
+    image: mariadb:latest        
     container_name: db
+    restart: always
     environment:
       MYSQL_DATABASE: testdb
       MYSQL_USER: test
       MYSQL_PASSWORD: P@ssw0rd
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root_password
+    networks:
+      - backend
 
   testapp:
-    image: site_latest
+    image: site:latest          
     container_name: testapp
     ports:
-      - "8080:80"
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_NAME: testdb
+      DB_USER: test
+      DB_PASS: P@ssw0rd
+    networks:
+      - backend
 
+networks:
+  backend:
+    driver: bridge
+```
+
+Запуск стека
+
+```
 docker-compose up -d
+```
+
+</details>
 
 <br/>
 
@@ -2598,21 +2671,125 @@ docker-compose up -d
 
 <br/>
 
+<details>
+<summary><strong> Настройка веб-приложения на HQ-SRV </strong></summary>
+
+Установка необходимых компонентов:
+
+```
 apt install apache2 mariadb-server php php-mysql -y
+```
 
-mysql
+Проверка
 
+```
+systemctl status apache2
+```
+
+```
+systemctl status mariadb
+```
+
+Вхолд в MariaDB
+
+```
+mariadb
+```
+
+```
 CREATE DATABASE webdb;
+CREATE USER 'web'@'localhost' IDENTIFIED BY 'P@ssw0rd';
+GRANT ALL PRIVILEGES ON webdb.* TO 'web'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
 
-CREATE USER 'web'@'%' IDENTIFIED BY 'P@ssw0rd';
+Импорт dump.sql
 
-GRANT ALL ON webdb.* TO 'web'@'%';
+```
+ mariadb webdb < /home/admin/webapp/dump.sql
+```
 
-mysql webdb < dump.sql
+Проверка
 
-cp index.php /var/www/html/
+```
+mariadb -e "USE webdb; SHOW TABLES;"
+```
 
-cp -r images /var/www/html/
+Создаём каталог для сайта (если используется дефолтный сайт Apache):
+
+```
+sudo mkdir -p /var/www/html/webapp
+```
+
+```
+cp /home/admin/webapp/index.php /var/www/html/webapp/
+```
+
+```
+cp -r /home/admin/webapp/images /var/www/html/webapp/
+```
+
+```
+chown -R www-data:www-data /var/www/html/webapp
+```
+
+```
+chmod -R 755 /var/www/html/webapp
+```
+
+Переход к папке и создание файла:
+
+```
+cd /var/www/html/webapp
+```
+
+```
+nano index.php
+```
+
+Прописыва5ем в файле код:
+
+```
+<?php
+$servername = "localhost";
+$username = "web";
+$password = "P@ssw0rd";
+$dbname = "webdb";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+?>
+```
+
+Перезапуск:
+
+```
+systemctl restart apache2
+```
+
+</details>
+
+
+<details>
+<summary><strong> Проверка работы</strong></summary>
+
+На клиенте:
+
+```
+http://HQ-SRV/webapp/index.php
+```
+
+На сервере
+
+```
+curl http://localhost/webapp/index.php
+```
+  
+</details>
 
 <br/>
 
@@ -2620,17 +2797,185 @@ cp -r images /var/www/html/
 
 <br/>
 
-HQ-RTR
+<details>
+<summary><strong> Настройка через IPTABLES </strong></summary>
 
-iptables -t nat -A PREROUTING -p tcp --dport 8080 -j DNAT --to 192.168.100.62:80
+### На HQ-RTR:
 
-iptables -t nat -A PREROUTING -p tcp --dport 2026 -j DNAT --to 192.168.100.62:22
+Настройка порта 8080:
 
-BR-RTR
+```
+iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 8080 -j DNAT --to-destination 192.168.100.15:80
+```
 
-iptables -t nat -A PREROUTING -p tcp --dport 8080 -j DNAT --to 192.168.0.2:8080
+```
+iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 80 -d 192.168.100.15 -j MASQUERADE
+```
 
-iptables -t nat -A PREROUTING -p tcp --dport 2026 -j DNAT --to 192.168.0.2:22
+Настройка порта 2026 (SSH):
+
+```
+iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 2026 -j DNAT --to-destination 192.168.100.15:22
+```
+
+```
+iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 22 -d 192.168.100.15 -j MASQUERADE
+```
+
+### На BR-RTR
+
+Настройка порта 8080:
+
+
+```
+iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 8080 -j DNAT --to-destination 192.168.0.2:8080
+```
+
+```
+iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 8080 -d 192.168.0.2 -j MASQUERADE
+```
+
+Настройка порта 2026:
+
+```
+iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 2026 -j DNAT --to-destination 192.168.0.2:22
+```
+
+```
+iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 22 -d 192.168.10.10 -j MASQUERADE
+```
+
+Сохраняем правила:
+
+```
+apt install iptables-persistent -y
+```
+
+```
+netfilter-persistent save
+```
+
+```
+netfilter-persistent reload
+```
+
+Проверка портов:
+
+# Проверка веб-приложения на HQ-SRV
+
+```
+curl http://203.0.113.20:8080
+```
+# Проверка Docker-приложения на BR-SRV
+
+```
+curl http://203.0.113.10:8080
+```
+
+# Проверка SSH на HQ-SRV
+
+```
+ssh -p 2026 webuser@203.0.113.20
+```
+
+# Проверка SSH на BR-SRV
+
+```
+ssh -p 2026 webuser@203.0.113.10
+```
+  
+</details>
+
+<details>
+<summary><strong> Настройка через NFTSBLES </strong></summary>
+
+Открываенм конфиги nftables:
+
+```
+nnao /etc/nftables.conf
+```
+
+Прописывем конфиг на BR-RTR:
+
+```
+#!/usr/sbin/nft -f
+
+flush ruleset
+
+table ip nat {
+    chain prerouting {
+        type nat hook prerouting priority dstnat; policy accept;
+
+        tcp dport 8080 dnat to 192.168.0.2:8080
+
+        tcp dport 2026 dnat to 192.168.0.2:22
+    }
+
+    chain postrouting {
+        type nat hook postrouting priority srcnat; policy accept;
+        
+        oifname "ens192" masquerade
+    }
+}
+
+
+table ip filter {
+    chain forward {
+        type filter hook forward priority filter; policy accept;
+    }
+}
+
+```
+
+Прописываем конфиг на HQ-RTR:
+
+```
+#!/usr/sbin/nft -f
+
+flush ruleset
+
+table ip nat {
+    chain prerouting {
+        type nat hook prerouting priority dstnat; policy accept;
+
+        tcp dport 8080 dnat to 192.168.100.15:80
+
+        tcp dport 2026 dnat to 192.168.100.15:22
+    }
+
+    chain postrouting {
+        type nat hook postrouting priority srcnat; policy accept;
+        
+        oifname "ens192" masquerade
+    }
+}
+
+table ip filter {
+    chain forward {
+        type filter hook forward priority filter; policy accept;
+    }
+}
+```
+
+Делаем файлы исполняемыми:
+
+```
+chmod +x /etc/nftables.conf
+```
+
+Применяем правила:
+
+```
+nft -f /etc/nftables.conf
+```
+
+Добавляем в автозагрузку:
+
+```
+systemctl enable nftables
+```
+
+</details>
 
 <br/>
 
@@ -2638,41 +2983,283 @@ iptables -t nat -A PREROUTING -p tcp --dport 2026 -j DNAT --to 192.168.0.2:22
 
 <br/>
 
-apt install nginx apache2-utils -y
+<details>
+<summary><strong> Настройка на ISP  </strong></summary>
 
-htpasswd -c /etc/nginx/.htpasswd WEB
+## Преднастройка
 
-nano /etc/nginx/sites-available/default
+Переход к хостам:
 
+```
+nano /etc/hosts
+```
+
+Обозначение маршрутов:
+
+```
+192.168.100.15 HQ-SRV
+192.168.0.2 BR-SRV
+```
+
+## Оснавная настройка
+
+Установка необходимых пакетов:
+
+```
+apt update && apt install nginx -y
+```
+Запуск nginx:
+
+```
+systemctl enable nginx
+```
+
+```
+systemctl start nginx
+```
+
+```
+systemctl status nginx
+```
+
+Создание конфига прокси:
+
+```
+nano /etc/nginx/sites-available/au-team
+```
+
+Конфиг:
+
+```
+# Reverse proxy for HQ-SRV web application
 server {
-  server_name web.au-team.irpo;
+    listen 80;
+    server_name web.au-team.irpo;
 
-  auth_basic "Restricted";
-  auth_basic_user_file /etc/nginx/.htpasswd;
+    location / {
+        auth_basic "Restricted Content";   
+        auth_basic_user_file /etc/nginx/.htpasswd;
 
-  location / {
-    proxy_pass http://172.16.4.2:8080;
-  }
+        proxy_pass http://192.168.100.15:80;  # Resolves via /etc/hosts
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
 }
 
+# Reverse proxy for BR-SRV Docker web application
 server {
-  server_name docker.au-team.irpo;
+    listen 80;
+    server_name docker.au-team.irpo;
 
-  location / {
-    proxy_pass http://172.16.5.2:8080;
-  }
+    location / {
+        proxy_pass http://192.168.0.2:8080;  # Resolves via /etc/hosts
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
 }
+```
 
+Активайция конфига:
+
+```
+ ln -s /etc/nginx/sites-available/au-team /etc/nginx/sites-enabled/
+```
+
+Проверка на ошибки
+
+```
+nginx -t
+```
+
+Презапуск:
+
+```
 systemctl restart nginx
+```
+</details>
+
+<details>
+<summary><strong> Настройка на HQ-CLI </strong></summary>
+
+Настройка хостов:
+
+```
+nano /etc/hosts
+```
+
+```
+172.16.4.1 web.au-team.irpo
+172.16.4.1 docker.au-team.irpo
+```
+
+## Проверка
+
+```
+apt install curl
+```
+
+Проверка адресации:
+
+```
+curl http://web.au-team.irpo
+```
+
+```
+curl http://docker.au-team.irpo
+```
+</details>
+
 
 <br/>
 
-## Задание 10. ЯНДЕКС БРАУЗЕР (HQ-CLI)
+### Задание 10 web-based аутентификация
+
+<details>
+<summary><strong> Настройка на ISP </strong></summary>
+
+Установка необходимых пакетов
+
+```
+apt update && apt install apache2-utils -y
+```
+
+Создаём файл усчётных записей
+
+```
+htpasswd -bc /etc/nginx/.htpasswd WEB P@ssw0rd
+```
+
+Проверка результата:
+
+```
+cat /etc/nginx/.htpasswd
+```
+
+Добавляем дополнительные строки в /etc/nginx/sites-available/au-team:
+
+```
+nano /etc/nginx/sites-available/au-team
+```
+
+
+>server {
+>   
+>   listen 80;
+>   
+>  server_name web.au-team.irpo;
+>
+>  location / {
+>   
+>  ```
+>    auth_basic "Restricted Area";           
+>    
+>     auth_basic_user_file /etc/nginx/.htpasswd; 
+>  ```
+>  
+>  proxy_pass http://<ВНЕШНИЙ_IP_HQ-RTR>:8080;
+>      
+>  proxy_set_header Host $host;
+>       
+>  proxy_set_header X-Real-IP $remote_addr;
+>        
+>  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+>   
+>  }
+>
+> }
+
+ Проверяем на ошибки:
+
+```
+ nginx -t
+```
+
+Перезагружаем 
+
+```
+systemctl reload nginx
+```
+  
+</details>
+
+<details>
+<summary><strong> Проверка с HQ-CLI </strong></summary>
+
+```
+curl -I http://web.au-team.irpo
+```
+
+Авторизация через curl
+
+```
+curl -u WEB:P@ssw0rd http://web.au-team.irpo
+```
+
+  
+</details>
+
+## Задание 11. ЯНДЕКС БРАУЗЕР (HQ-CLI)
 
 <br/>
 
-wget https://repo.yandex.ru/yandex-browser/YANDEX-BROWSER-KEY.GPG
+<details>
+<summary><strong> Установка браузера </strong></summary>
 
-apt install ./yandex-browser*.deb
+Указываем прямую ссылку:
+
+```
+wget https://browser.yandex.ru/download/?os=linux&lang=ru -O yandex-browser.deb
+```
+
+Устанавливаем пакет
+
+```
+sudo dpkg -i yandex-browser.deb
+```
+
+# Если возникли ошибки:
+
+```
+sudo apt-get install -f -y
+```
+
+Проверяем установку:
+
+```
+yandex-browser --version
+```
+  
+</details>
+
+<details>
+<summary><strong> Проверка заруска </strong></summary>
+
+Через командную строку:
+
+```
+yandex-browser
+```
+
+Через ярылк:
+
+```
+nano ~/.local/share/applications/yandex-browser.desktop
+```
+
+```
+[Desktop Entry]
+Version=1.0
+Name=Yandex Browser
+Comment=Browse the Web
+Exec=/usr/bin/yandex-browser %U
+Icon=yandex-browser
+Terminal=false
+Type=Application
+Categories=Network;WebBrowser;
+
+```
+</details>
 
 <br/>
