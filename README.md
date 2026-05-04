@@ -1289,7 +1289,7 @@ nano /etc/bind/named.conf.options
 
 ```
   listen-on { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/28; 172.16.0.0/28; };
-  forwarders { 127.0.0.1; 8.8.8.8; 192.168.100.15; 8.8.4.4; };
+  forwarders { 8.8.8.8;  8.8.4.4; };
   recursion yes;
   allow-query { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/28; 172.16.0.0/28; };
   allow-query-cache { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/28; 172.16.0.0/28; };
@@ -1378,6 +1378,7 @@ $TTL    1D
                                 1H              ; ncache
                         )
 @       IN      NS      hq-srv.au-team.irpo.
+@       IN      A       192.168.100.15
 hq-rtr  IN      A       192.168.100.1
 br-rtr  IN      A       192.168.0.1
 hq-srv  IN      A       192.168.100.15
@@ -1416,9 +1417,9 @@ $TTL    1D
                                 1W              ; Expire
                                 1H              ; Ncache
                         )
-@       IN      NS      localhost.
+@       IN      NS      hq-srv.au-team.irpo.
 1       IN      PTR     hq-rtr.au-team.irpo.
-62      IN      PTR     hq-srv.au-team.irpo.
+15      IN      PTR     hq-srv.au-team.irpo.
 ```
 
 </br>
@@ -1437,7 +1438,7 @@ $TTL    1D
                                 1W              ; Expire
                                 1H              ; Ncache
                         )
-@       IN      NS      localhost.
+@       IN      NS      hq-srv.au-team.irpo.
 2       IN      PTR     hq-cli.au-team.irpo.
 ```
 
@@ -1457,7 +1458,7 @@ $TTL    1D
                                 1W              ; Expire
                                 1H              ; Ncache
                         )
-@       IN      NS      localhost.
+@       IN      NS      hq-srv.au-team.irpo.
 1       IN      PTR     br-rtr.au-team.irpo.
 2       IN      PTR     br-srv.au-team.irpo.
 ```
