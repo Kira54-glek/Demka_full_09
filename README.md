@@ -1173,17 +1173,26 @@ subnet 192.168.200.0 netmask 255.255.255.240 {
 <br/>
 
 **3.** После чего переходим в конфигурацию файла `isc-dhcp-server` и меняем ее добалвяя данный текст:
+
 ```
 nano /etc/default/isc-dhcp-server
+```
 
-INTERFACESv4="ens224:1" - порт смотрящий в сторону CLI
+Порт смотрящий в сторону CLI 
+
+```
+INTERFACESv4="ens224:1" 
 ```
 
 <br/>
 
 **4.** Включаем сервиc **`DHCP`** и добавляем в автозагрузку на **`HQ-RTR`**:
+
 ```
 systemctl start isc-dhcp-server
+```
+
+```
 systemctl enable isc-dhcp-server
 ```
 
@@ -1268,7 +1277,7 @@ systemctl enable isc-dhcp-server
 **1.** Для работы с **DNS** требуется установить **`bind`** и доп. пакет командой:
 
 ```
-apt-get install bind9 bind9-utils
+apt-get install bind9 bind9-utils -y
 ```
 <br/>
 
@@ -1279,12 +1288,12 @@ nano /etc/bind/named.conf.options
 ```
 
 ```
-  listen-on { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/27; 172.16.0.0/30; };
-  forwarders { 127.0.0.1; 8.8.8.8; 192.168.100.62; 8.8.4.4; };
+  listen-on { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/28; 172.16.0.0/28; };
+  forwarders { 127.0.0.1; 8.8.8.8; 192.168.100.15; 8.8.4.4; };
   recursion yes;
-  allow-query { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/27; 172.16.0.0/30; };
-  allow-query-cache { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/27; 172.16.0.0/28; };
-  allow-recursion { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/27; 172.16.0.0/28; };
+  allow-query { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/28; 172.16.0.0/28; };
+  allow-query-cache { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/28; 172.16.0.0/28; };
+  allow-recursion { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/28; 172.16.0.0/28; };
   dnssec-validation auto;
 ```
 <br/>
@@ -1316,7 +1325,7 @@ nano /etc/resolv.conf
 ```
 
 ```
-nameserver 192.168.100.62
+nameserver 192.168.100.15
 search au-team.irpo
 ```
 </br>
@@ -1371,8 +1380,8 @@ $TTL    1D
 @       IN      NS      hq-srv.au-team.irpo.
 hq-rtr  IN      A       192.168.100.1
 br-rtr  IN      A       192.168.0.1
-hq-srv  IN      A       192.168.100.62
-hq-cli  IN      A       192.168.200.3
+hq-srv  IN      A       192.168.100.15
+hq-cli  IN      A       192.168.200.2
 br-srv  IN      A       192.168.0.2
 moodle  IN      CNAME   hq-rtr
 wiki    IN      CNAME   br-rtr
@@ -1476,7 +1485,7 @@ nano /etc/resolv.conf
 ```
 
 ```
-nameserver 192.168.100.62
+nameserver 192.168.100.15
 search au-team.irpo
 ```
 </br>
