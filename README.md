@@ -1151,7 +1151,7 @@ table ip nat {
 
 **1.** Устанавливаем сам **DHCP-сервер**:  
 ```
-apt install isc-dhcp-server
+apt install isc-dhcp-server -y
 ```
 <br/>
 
