@@ -205,6 +205,12 @@ newgrp
 ### Настройка адресации (кроме HQ-CLI(он позже))
 ##
 ### ISP:
+
+```
+ nano /etc/network/interfaces
+```
+
+
 ```
 auto ens224
 iface ens224 inet static
@@ -215,9 +221,14 @@ address 172.16.2.1/28
 ```
 
 ### HQ-RTR: (в 4 и 6 задании продолжение)
+
 ```
-allow-hotplug ens192
-iface ens192 inet static
+ nano /etc/network/interfaces
+```
+
+```
+auto ens192  
+iface ens192 inet static  
 address 172.16.1.2/28
 gateway 172.16.1.1
 
@@ -229,9 +240,38 @@ mode gre
 local 172.16.1.2
 endpoint 172.16.2.2
 ttl 64
+  
+auto ens224  
+iface ens224 inet static  
+address 192.168.100.1/27 
+  
+auto ens224:1  
+iface ens224:1 inet static  
+address 192.168.200.1/28
+
+auto ens224:2  
+iface ens224:2 inet static  
+address 192.168.99.9/29
+
+auto ens224.100  
+iface ens224.100 inet manual   
+Vlan-raw-device ens224  
+  
+auto ens224.200  
+iface ens224.200 inet manual   
+Vlan-raw-device ens224:1
+
+auto ens224.999  
+iface ens224.999 inet manual   
+Vlan-raw-device ens224:2
 ```
 
 ### BR-RTR: (в 6 задании продолжение)
+
+```
+ nano /etc/network/interfaces
+```
+
 ```
 allow-hotplug ens192
 iface ens192 inet static
@@ -255,6 +295,10 @@ ttl 64
 ### BR-SRV:
 
 ```
+ nano /etc/network/interfaces
+```
+
+```
 allow-hotplug ens192
 iface ens192 inet static
 address 192.168.0.2/28
@@ -264,6 +308,10 @@ dns-search au-team.irpo
 ```
 
 ### HQ-SRV:
+
+```
+ nano /etc/network/interfaces
+```
 
 ```
 allow-hotplug ens192
