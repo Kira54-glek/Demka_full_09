@@ -1664,16 +1664,18 @@ br-srv.au-team.irpo
 systemctl disable --now smbd nmbd winbind
 ```
 
-Все эти функции на себя возьмет служба samba-ad-dc. Если мы не выключим перечисленные сервисы, будет конфликт и ошибка в работе. По идее, они будут заблокированы автоматически (masked0, но лишняя осторожность не повредит.
-
-```
-samba-tool domain provision 
-```
 Удаление/перенос класического конфигурационного фала smb.conf, иначе так же может возникнуть ошибка:
 
 ```
 mv /etc/samba/smb.conf /etc/samba/smb.conf.backup
 ```
+
+Все эти функции на себя возьмет служба samba-ad-dc. Если мы не выключим перечисленные сервисы, будет конфликт и ошибка в работе. По идее, они будут заблокированы автоматически (masked0, но лишняя осторожность не повредит.
+
+```
+samba-tool domain provision 
+```
+
 
 👉 создаёт контроллер домена
 
@@ -1878,6 +1880,10 @@ nano /etc/sudoers
 Первым делом, необходимо ввести HQ-CLI в домен, это делается достаточно просто. Заходим в /etc/resolv.conf и прописываем следующие занчения:
 
 ```
+nano /etc/resolv.conf
+```
+
+```
 nameserver 192.168.0.2
 
 search au-team.irpo
@@ -1925,6 +1931,22 @@ id_provider = ad
 auth_provider = ad
 access_provider = simple
 simple_allow_groups = hq
+
+```
+
+Альтернативный метод, если возникает ошибка Permission denied
+
+```
+[sssd]
+services = nss, pam
+domains = au-team.irpo
+
+[domain/au-team.irpo]
+id_provider = ad
+auth_provider = ad
+access_provider = ad
+simple_allow_groups = hq
+
 ```
 
 Задаём права "только для чтения" на этот файл:
