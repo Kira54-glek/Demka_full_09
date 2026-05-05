@@ -1672,6 +1672,11 @@ timedatectl set-timezone Asia/Tomsk
 <br/>
 
 Прописать в файле /etc/hosts ip, доменное имя (полностью) и имя сервера. Как это должно выглядеть:
+
+```
+nano /etc/hosts
+```
+
 ```
 192.168.0.2 br-srv.au-team.irpo br-srv
 ```
