@@ -1383,6 +1383,10 @@ search au-team.irpo
 </br>
 
 **6.** После чего требуется прописать в **`/etc/bind/named.conf.local`**:
+```
+nano /etc/bind/named.conf.local
+```
+
 
 ```
 zone "au-team.irpo" {
