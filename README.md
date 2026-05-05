@@ -1986,26 +1986,20 @@ realm permit -g hq
 [sssd]
 services = nss, pam
 domains = au-team.irpo
+config_file_version = 2
 
 [domain/au-team.irpo]
+default_shell = /bin/bash
+krb5_store_password_if_offline = True
+cache_credentials = True
+krb5_realm = AU-TEAM.IRPO
+realmd_tags = manages-system joined-with-adcli
 id_provider = ad
-auth_provider = ad
+fallback_homedir = /home/%u@%d
+ad_domain = au-team.irpo
+use_fully_qualified_names = False
+ldap_id_mapping = False
 access_provider = simple
-simple_allow_groups = hq
-
-```
-
-Альтернативный метод, если возникает ошибка Permission denied
-
-```
-[sssd]
-services = nss, pam
-domains = au-team.irpo
-
-[domain/au-team.irpo]
-id_provider = ad
-auth_provider = ad
-access_provider = ad
 simple_allow_groups = hq
 
 ```
@@ -2239,6 +2233,11 @@ realm join au-team.irpo -U Administrator --verbose
 
 <img width="454" height="43" alt="изображение" src="https://github.com/user-attachments/assets/e3b40380-1796-435e-a009-d34fa7a4c049" />
 
+После прописываем <code> bash </code> для входа в обычный терминал:
+
+```
+bash
+```
 
 </details>
 
