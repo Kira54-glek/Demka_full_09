@@ -934,16 +934,20 @@ sudo apt install -y frr
 
 ```
 nano /etc/frr/daemons
+```
 
 !!! Ищем следующую строку и меняем с (no) на (yes)
 ospfd = yes
 
-```
+
 
 **3.** Далее перезаргужаем и добавляем в автозагрузку службу **`FRR`**
 
 ```
 systemctl restart frr
+```
+
+```
 systemctl enable --now frr
 ```
 
