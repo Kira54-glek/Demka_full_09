@@ -2058,8 +2058,9 @@ P@ssw0rd
 ```
 su - hquser1@au-team.irpo
 ```
+<details>
+<summary><strong>Если вывод - <code> System eror </code></strong></summary>
 
-Если вывод - <code> System eror </code>, то делаем следующее:
 
 ```
 systemctl stop sssd
@@ -2096,9 +2097,148 @@ systemctl restart sssd
 su - hquser1@au-team.irpo 
 ```
 
+</details>
+
+
+<details>
+<summary><strong>Если <code> Permission denied </code> </strong></summary>
+
+Скорее всего, пользователь не входит в группу. Для проверки, введите команду:
+
+```
+id hquser1@au-team.irpo
+```
+
+Результат должен быть следующим:
+
+<img width="801" height="46" alt="изображение" src="https://github.com/user-attachments/assets/433a3f68-acd8-4aec-9112-151247359f63" />
+
+Если в показателях <code> gid </code> и <code> groups </code> вы не видете группу hq, то делаем следующее.
+
+Заходим на сервер и прописываем следующую команду, выдавая индивидуальный gid группе:
+
+```
+samba-tool group addunixattrs hq 10065
+```
+
+После, выдём каждому пользователям собственный uid и gid:
+
+```
+ samba-tool user addunixattrs hquser1 10060 --gid-number=10065 
+```
+
+```
+ samba-tool user addunixattrs hquser2 10061 --gid-number=10065 
+```
+
+```
+ samba-tool user addunixattrs hquser3 10062 --gid-number=10065 
+```
+
+```
+ samba-tool user addunixattrs hquser4 10063 --gid-number=10065 
+```
+
+```
+samba-tool user addunixattrs hquser5 10064 --gid-number=10065 
+```
+
+Проверяем группу:
+
+```
+samba-tool group show hq
+```
+
+Ищем выделленый строки и проверяем наличие пользователей
+
+Зелённый - пользователи в группе
+
+Красный - персональный gid группы
+
+
+<img width="658" height="456" alt="image" src="https://github.com/user-attachments/assets/d47fefd7-2105-4f4a-a8fe-f7a9944bc1b9" />
+
+
+Таким же образом проверяем пользователя проверяеем пользователя:
+
+```
+samba-tool user show hquser1
+```
+
+Ищем выделенные строки:
+
+<img width="776" height="662" alt="image" src="https://github.com/user-attachments/assets/d7b44e8f-da11-4e68-828c-8c64d60170f6" />
+
+ 
+
+ После, очищаем кэш у <code> sssd </code> на HQ-CLI
+
+ ```
+systemctl stop sssd
+```
+
+```
+rm -rf /var/lib/sss/db/*
+
+```
+
+```
+rm -rf /var/lib/sss/mc/*
+```
+
+```
+systemctl start sssd
+```
+  
+</details>
+
+<details>
+<summary><strong>Если <code> No such file or directory </code> на <code> au-team.irpo </code> </strong></summary>
+
+```
+chown root:root /etc/sssd/sssd.conf
+```
+
+```
+chmod 600 /etc/sssd/sssd.conf
+```
+
+```
+systemctl restart sssd
+```
+  
+</details>
+
+<details>
+<summary><strong>Если <code> Already running another action </code></strong></summary>
+
+```
+systemctl restart realmd
+```
+
+```
+pkill -9 adcli
+```
+
+```
+pkill -9 packagekitd
+```
+
+```
+rm -f /var/lib/sss/db/*
+```
+
+```
+realm join au-team.irpo -U Administrator --verbose
+```
+  
+</details>
+
 ## Должно появиться следующее сообщение:
 
-<img width="733" height="95" alt="изображение" src="https://github.com/user-attachments/assets/3403a5ff-d63b-4ee6-b1d8-f9e940a01bc2" />
+
+<img width="454" height="43" alt="изображение" src="https://github.com/user-attachments/assets/e3b40380-1796-435e-a009-d34fa7a4c049" />
+
 
 </details>
 
