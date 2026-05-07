@@ -1990,6 +1990,7 @@ config_file_version = 2
 
 [domain/au-team.irpo]
 default_shell = /bin/bash
+override_shell = /bin/bash
 krb5_store_password_if_offline = True
 cache_credentials = True
 krb5_realm = AU-TEAM.IRPO
