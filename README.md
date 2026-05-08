@@ -1706,7 +1706,7 @@ search br-srv.au-team.irpo
 </br>
 
 ```
-apt install samba samba-dsdb-modules samba-vfs-modules acl attr winbind libpam-winbind libnss-winbind krb5-config krb5-user libpam-krb5 smbclient dnsutils net-tools
+apt install samba samba-dsdb-modules samba-vfs-modules acl attr winbind libpam-winbind libnss-winbind krb5-config krb5-user libpam-krb5 smbclient dnsutils net-tools -y
 ```
 
 Указываем следующие значения, в следующих трёх появившихся полях, по порядку:
@@ -2065,7 +2065,7 @@ P@ssw0rd
 ```
 
 <details>
-<summary><strong>Если не получается зайти на пользователя </strong></summary>
+<summary><strong>Если возникли ошибки </strong></summary>
 
 ## Если не получается зайти на пользователя из начального экрана, необходимо проверить, что это за ошибка. Для этого заходим в уже имеющегося, прописывам: 
 
@@ -2239,10 +2239,26 @@ v
 Должен быть слудующий результат:
 
 <img width="696" height="217" alt="image" src="https://github.com/user-attachments/assets/695b726e-e452-48f3-82c4-f0a1fba4b3d9" />
-
-
   
 </details>
+
+<details>
+<summary><strong>Если <code> ошибка отсутствия realm, но при попытке установки сообщается что служба есть </code> </strong></summary>
+
+Обновляем имеющиеся пакеты и пути к ним
+
+```
+apt update
+```
+
+Принудительно переустанавливаем и обновляем службу:
+
+```
+apt install --reinstall realmd adcli sssd sssd-tools samba-common-bin
+```
+  
+</details>
+
 
 <details>
 <summary><strong>Если <code> No such file or directory </code> на <code> au-team.irpo </code> </strong></summary>
