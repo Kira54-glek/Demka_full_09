@@ -2000,15 +2000,15 @@ config_file_version = 2
 [domain/au-team.irpo]
 default_shell = /bin/bash
 override_shell = /bin/bash
-krb5_store_password_if_offline = True
-cache_credentials = True
+krb5_store_password_if_offline = true
+cache_credentials = false
 krb5_realm = AU-TEAM.IRPO
 realmd_tags = manages-system joined-with-adcli
 id_provider = ad
 fallback_homedir = /home/%u@%d
 ad_domain = au-team.irpo
-use_fully_qualified_names = False
-ldap_id_mapping = False
+use_fully_qualified_names = true
+ldap_id_mapping = false
 access_provider = simple
 simple_allow_groups = hq
 
@@ -2019,6 +2019,16 @@ simple_allow_groups = hq
 ```
 chmod 600 /etc/sssd/sssd.conf
 ```
+
+Так же, настраиваем вход по поролю для всех, даже если заходят из-под <code> root </code>. Для этого переходим в конфиги <code> PAM </code>
+
+```
+nano /etc/pam.d/su
+```
+
+После чего, коментим следующую строку:
+
+<img width="354" height="30" alt="image" src="https://github.com/user-attachments/assets/e51f67a5-dbd8-44d4-a8ba-ac05aff0dc97" />
 
 Рестартим:
 
