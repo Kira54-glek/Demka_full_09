@@ -1340,6 +1340,8 @@ nano /etc/bind/named.conf.options
 ```
 
 ```
+optoins {
+  directoru "/var/cache/bind";
   listen-on { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/28; 172.16.0.0/28; };
   forwarders { 8.8.8.8;  8.8.4.4; };
   recursion yes;
@@ -1347,6 +1349,7 @@ nano /etc/bind/named.conf.options
   allow-query-cache { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/28; 172.16.0.0/28; };
   allow-recursion { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/28; 172.16.0.0/28; };
   dnssec-validation auto;
+}
 ```
 <br/>
 
