@@ -974,9 +974,9 @@ int gre1
   no ip ospf passive
   ip ospf authentication
   ip ospf authentication-key password
-(config-if)exit
-(config)exit
-#write
+exit
+exit
+write
 ```
 <br>
 
@@ -1009,9 +1009,9 @@ int gre1
   no ip ospf passive
   ip ospf authentication
   ip ospf authentication-key password
-(config-if)exit
-(config)exit
-#write
+exit
+exit
+write
 ```
 
 ### ПРОВЕРКА
