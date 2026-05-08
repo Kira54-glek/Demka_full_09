@@ -2233,7 +2233,7 @@ chmod 600 /etc/sssd/sssd.conf
 Так же, sssd может не знать что ему нужно брать. Для этого проверяем файл <code> /etc/nsswitch.conf </code>.
 
 ```
-v
+cat /etc/nsswitch.conf
 ```
 
 Должен быть слудующий результат:
