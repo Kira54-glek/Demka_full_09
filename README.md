@@ -1893,7 +1893,7 @@ samba-tool group add hq
 for i in {1..5}; do samba-tool group addmembers hq hquser$i; done
 ```
 
-Sudo ограничения:
+Sudo ограничения, прописывать на HQ-CLI:
 
 <details>
 <summary><strong>visudo</strong></summary>
@@ -1917,12 +1917,18 @@ visudo
 </details>
 
 <details>
-<summary><strong>Конфиги <code>/etc/sudoers </code>/</strong></summary>
+<summary><strong>через файл политик <code>/etc/sudoers.d/hq_policy </code>/</strong></summary>
 
 Переходим в конфиги:
 
 ```
-nano /etc/sudoers
+touch /etc/sudoers.d/hq_policy
+```
+
+Переходим в файл:
+
+```
+nano /etc/sudoers.d/hq_policy
 ```
 
 Прописываем правило:
