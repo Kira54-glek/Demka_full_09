@@ -1920,13 +1920,19 @@ visudo
 Добавить:
 
 ```
-%hq ALL=(ALL) NOPASSWD: /bin/cat, /bin/grep, /usr/bin/id
+%hq ALL=(ALL) NOPASSWD: /usr/bin/cat, /usr/bin/grep, /usr/bin/id
 ```
 
 </details>
 
 <details>
 <summary><strong>через файл политик <code>/etc/sudoers.d/hq_policy </code>/</strong></summary>
+
+Устанавливаем sudo
+
+```
+apt install sudo -y
+```
 
 Переходим в конфиги:
 
@@ -1943,7 +1949,7 @@ nano /etc/sudoers.d/hq_policy
 Прописываем правило:
 
 ```
-%hq ALL=(ALL) NOPASSWD: /bin/cat, /bin/grep, /usr/bin/id
+%hq ALL=(ALL) NOPASSWD: /usr/bin/cat, /usr/bin/grep, /usr/bin/id
 ```
 
 </details>
@@ -1984,7 +1990,12 @@ realm join au-team.irpo -U Administrator
 ```
 
 
-Добавляем дополнительные права пользоватлею HQ-CLI для возможности пользоваться командами <code>realm</code> без пользования <code>root</code> прав. Для этого переходим в каталог ```nano /home/usr1/.bashrc``` и прописываем следующие значения:
+Добавляем дополнительные права пользоватлею HQ-CLI для возможности пользоваться командами <code>realm</code> без пользования <code>root</code> прав. Для этого переходим в каталог ```nano /home/locadm/.bashrc``` и прописываем следующие значения:
+
+```
+nano /home/locadm/.bashrc
+```
+
 
 ```
 export PATH=$PATH:/usr/sbin
@@ -2003,6 +2014,10 @@ realm permit -g hq
 ```
 
 После, прописываем права доступа на hq-cli в каталоге ```nano /etc/sssd/sssd.conf``` :
+
+```
+nano /etc/sssd/sssd.conf
+```
 
 ```
 [sssd]
@@ -2605,6 +2620,13 @@ nano /etc/fstab
 echo "192.168.100.15:/raid/nfs  /mnt/nfs  nfs  defaults,_netdev  0  0" >> /etc/fstab
 ```
 
+Перезагружаем демона
+
+```
+systemctl daemon-reload
+```
+
+
 Производим монтирование:
 
 ```
@@ -2856,7 +2878,7 @@ ssh-copy-id -p 2026 root@192.168.200.0 (if no jobs -> 192.168.200.ip_ha-cli)
 ```
 
 ```
-ssh-copy-id -p 2026 root@<172.16.1.2
+ssh-copy-id -p 2026 root@172.16.1.2
 ```
 
 ```
@@ -3047,7 +3069,7 @@ services:
     depends_on:
       - db
     environment:
-      DB_TYPE: mysql 
+      DB_TYPE: maria 
       DB_HOST: db
       DB_NAME: testdb
       DB_USER: test
@@ -3065,6 +3087,21 @@ networks:
 ```
 docker-compose up -d
 ```
+Запуск контейнера, так как он запускается раньше базы данных от чего могут возникать ошибки
+
+```
+docker-compose start testapp
+```
+Проверяем
+
+```
+docker-compose ps
+```
+
+Результат:
+
+<img width="789" height="116" alt="image" src="https://github.com/user-attachments/assets/5d2ab1a5-ee51-40c9-bb10-be3e85f53b4a" />
+
 
 </details>
 
