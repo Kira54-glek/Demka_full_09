@@ -2974,9 +2974,9 @@ ansible all -m ping
 
 •	Средствами docker должен создаваться стек контейнеров с веб приложением и базой данных 
 
-•	Используйте образы site_latestи mariadb_latestрасполагающиеся в директории docker в образе Additional.iso 
+•	Используйте образы site_latestи mariadb_latest располагающиеся в директории docker в образе Additional.iso 
 
-•	Основной контейнер testapp должен называться tespapp 
+•	Основной контейнер testapp должен называться testpapp 
 
 •	Контейнер с базой данных должен называться db 
 
@@ -3051,7 +3051,7 @@ version: '3.8'
 
 services:
   db:
-    image: mariadb:latest        
+    image: mariadb:10.11       
     container_name: db
     restart: always
     environment:
@@ -3165,10 +3165,18 @@ mariadb
 
 ```
 CREATE DATABASE webdb;
-CREATE USER 'web'@'localhost' IDENTIFIED BY 'P@ssw0rd';
+CREATE USER 'web'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('P@ssw0rd');
+CREATE USER 'web'@'%' IDENTIFIED VIA mysql_native_password USING PASSWORD('P@ssw0rd');
+GRANT ALL PRIVILEGES ON webdb.* TO 'web'@'%';
 GRANT ALL PRIVILEGES ON webdb.* TO 'web'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
+```
+Создаём точку монтирования ISO и монтируем её туда:
+
+```
+mkdir -p /mnt/iso
+mount /dev/sr0 /mnt/iso 2>/dev/null || mount -o loop /path/to/Additional.iso /mnt/iso
 ```
 
 Импорт dump.sql
@@ -3182,40 +3190,33 @@ EXIT;
 ```
 mariadb -e "USE webdb; SHOW TABLES;"
 ```
+Результат должен быть следующим:
 
-Создаём каталог для сайта (если используется дефолтный сайт Apache):
+<img width="442" height="126" alt="image" src="https://github.com/user-attachments/assets/778296e5-836c-44a1-83e0-310afe781dda" />
 
-```
-sudo mkdir -p /var/www/html/webapp
-```
-
-```
-cp /home/admin/webapp/index.php /var/www/html/webapp/
-```
+Далее копируем фалы в каталог apache и присваиваем права владельца:
 
 ```
-cp -r /home/admin/webapp/images /var/www/html/webapp/
+cp /mnt/iso/web/index.php /var/www/html/
 ```
 
 ```
-chown -R www-data:www-data /var/www/html/webapp
+cp /mnt/iso/web/logo.png /var/www/html/
 ```
 
 ```
-chmod -R 755 /var/www/html/webapp
-```
-
-Переход к папке и создание файла:
-
-```
-cd /var/www/html/webapp
+chown -R www-data:www-data /var/www/html/
 ```
 
 ```
-nano index.php
+chmod -R 755 /var/www/html/
 ```
 
-Прописыва5ем в файле код:
+Заходим в файл и редактируем его:
+
+```
+nano /var/www/html/index.php
+```
 
 ```
 <?php
@@ -3223,19 +3224,26 @@ $servername = "localhost";
 $username = "web";
 $password = "P@ssw0rd";
 $dbname = "webdb";
+```
+Далее переходим в ещё один конфигурационный файл и происываем следующие значения:
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+```
+nano /etc/mysql/mariadb.conf.d/50-server.cnf
+```
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-?>
+Меняем на 0.0.0.0 bind-address в файле
+
+<code>bind-address = 0.0.0.0</code>
+
+```
+skip-name-resolve = ON
 ```
 
 Перезапуск:
 
 ```
 systemctl restart apache2
+systemctl restart mariadb
 ```
 
 </details>
@@ -3247,13 +3255,19 @@ systemctl restart apache2
 На клиенте:
 
 ```
-http://HQ-SRV/webapp/index.php
+http://192.168.100.15/index.php
+```
+
+или
+
+```
+http://au-team.irpo/index.php
 ```
 
 На сервере
 
 ```
-curl http://localhost/webapp/index.php
+php /var/www/html/index.php | head -n 10
 ```
   
 </details>
