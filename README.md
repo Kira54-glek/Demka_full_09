@@ -523,7 +523,21 @@ iptables-save > /etc/iptables/rules.v4
 ```
 </br>
 
-<summary><strong><code>Либо настройка через nftables </code></strong></summary> 
+###Если не работает, презагрузите машину, на которую пытаетесь раздать интернет, либо, возвращайтесь к другому варианту.
+
+> **`ens192`** - интерфейс с которого приходит **интернет**
+> 
+> Для проверки можно использовать команду: **`iptables –L –t nat`** - должны высветится в Chain POSTROUTING две настроенные подсети  
+
+> Для того, чтобы сбросить настройку *nat*, можно использовать команду **`iptables -t nat -F`**
+
+#
+
+</details>
+
+
+<details>
+<summary><strong><code>Настройка через nftables (быстрее и удобнее) </code></strong></summary> 
 
   ```
 nano /etc/nftables.conf
@@ -537,15 +551,26 @@ table ip nat {
 }
  ```
 
-###Если не работает, презагрузите машину, на которую пытаетесь раздать интернет, либо, возвращайтесь к другому варианту.
+Если не работает:
 
-> **`ens192`** - интерфейс с которого приходит **интернет**
-> 
-> Для проверки можно использовать команду: **`iptables –L –t nat`** - должны высветится в Chain POSTROUTING две настроенные подсети  
+```
+systemctl restart nftables
+```
 
-> Для того, чтобы сбросить настройку *nat*, можно использовать команду **`iptables -t nat -F`**
+```
+systemctl restart networking
+```
 
-#
+```
+sysctl -p
+```
+
+Потом на соседнем устройстве
+
+```
+systemctl restart networking
+```
+
 </details>
 
 </details>
@@ -2818,7 +2843,7 @@ chronyc tracking
 apt install ssh -y
 ```
 
-Полсе переходим в конфигруации и прописываем два правила:
+Полсе переходим в конфигруации и прописываем два правила, а так же раскоментируем порт 22 на роутервх:
 
 ```
 nano /etc/ssh/sshd_config
@@ -2829,6 +2854,16 @@ Port 2026
 
 PermitRootLogin yes
 ```
+
+# Как должно выглядеть устройство:
+
+<img width="560" height="146" alt="изображение" src="https://github.com/user-attachments/assets/53e0cce3-5677-43bd-a0a8-7e4ea1b7eb6a" />
+
+ 
+# Как должен выглядеть роутер и HQ-CLI:
+
+<img width="639" height="287" alt="изображение" src="https://github.com/user-attachments/assets/252596c2-8ce4-4f67-a34c-fd828f955a97" />
+
 
 Перезапускаем SSH:
 
@@ -2871,37 +2906,37 @@ ssh-keygen -t rsa
 Далее, производим копирование ключа на устройства, везде нужно будет ввести пароль P@ssw0rd:
 
 ```
-ssh-copy-id -p 2026 root@192.168.100.15
+ssh-copy-id -p 22 root@192.168.100.15
 ```
 
 ```
-ssh-copy-id -p 2026 root@192.168.200.0 (if no jobs -> 192.168.200.ip_ha-cli)
+ssh-copy-id -p 22 root@192.168.200.0 (if no jobs -> 192.168.200.ip_ha-cli)
 ```
 
 ```
-ssh-copy-id -p 2026 root@172.16.1.2
+ssh-copy-id -p 22 root@172.16.1.2
 ```
 
 ```
-ssh-copy-id -p 2026 root@172.16.2.2
+ssh-copy-id -p 22 root@172.16.2.2
 ```
 
 Проверьте подключенеиме.
 
 ```
-ssh -p 2026 root@192.168.100.15
+ssh -p 22 root@192.168.100.15
 ```
 
 ```
-ssh -p 2026 root@192.168.200.3
+ssh -p 22 root@192.168.200.3
 ```
 
 ```
-ssh -p 2026 root@172.16.1.2
+ssh -p 22 root@172.16.1.2
 ```
 
 ```
-ssh -p 2026 root@172.16.2.2
+ssh -p 22 root@172.16.2.2
 ```
 
 </details>
@@ -2931,10 +2966,10 @@ nano /etc/ansible/hosts
 Прописываме настроку хостов:
 
 ```
-HQ-SRV ansible_host=192.168.100.15 ansible_port=2026
-HQ-CLI ansible_host=192.168.200.2  ansible_port=2026
-HQ-RTR ansible_host=172.16.1.2    ansible_port=2026
-BR-RTR ansible_host=172.16.2.2    ansible_port=2026
+HQ-SRV ansible_host=192.168.100.15 ansible_port=22  ansible_port=2026
+HQ-CLI ansible_host=192.168.200.2  ansible_port=22  ansible_port=2026
+HQ-RTR ansible_host=172.16.1.2    ansible_port=22    ansible_port=2026
+BR-RTR ansible_host=172.16.2.2    ansible_port=22    ansible_port=2026
 ```
 
 Отключаем проверку подлиности, рнонходим в конфигурации Ansible:
@@ -3303,7 +3338,7 @@ php /var/www/html/index.php | head -n 10
 Настройка порта 8080:
 
 ```
-iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 8080 -j DNAT --to-destination 192.168.100.15:80
+iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 8080 -j DNAT --to-destination 192.168.100.15:8080
 ```
 
 ```
@@ -3313,7 +3348,7 @@ iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 80 -d 192.168.100.15 -j 
 Настройка порта 2026 (SSH):
 
 ```
-iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 2026 -j DNAT --to-destination 192.168.100.15:22
+iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 2026 -j DNAT --to-destination 192.168.100.15:2026
 ```
 
 ```
@@ -3336,7 +3371,7 @@ iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 8080 -d 192.168.0.2 -j M
 Настройка порта 2026:
 
 ```
-iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 2026 -j DNAT --to-destination 192.168.0.2:22
+iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 2026 -j DNAT --to-destination 192.168.0.2:2026
 ```
 
 ```
