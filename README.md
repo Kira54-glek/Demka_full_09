@@ -3404,9 +3404,9 @@ table ip nat {
     chain prerouting {
         type nat hook prerouting priority dstnat; policy accept;
 
-        tcp dport 8080 dnat to 192.168.0.2:8080
+        iifname "ens192" tcp dport 8080 dnat to 192.168.0.2:8080
 
-        tcp dport 2026 dnat to 192.168.0.2:22
+        iifname "ens192" tcp dport 2026 dnat to 192.168.0.2:2026
     }
 
     chain postrouting {
@@ -3436,9 +3436,9 @@ table ip nat {
     chain prerouting {
         type nat hook prerouting priority dstnat; policy accept;
 
-        tcp dport 8080 dnat to 192.168.100.15:80
+        iifname "ens192" tcp dport 8080 dnat to 192.168.100.15:8080
 
-        tcp dport 2026 dnat to 192.168.100.15:22
+        iifname "ens192" tcp dport 2026 dnat to 192.168.100.15:2026
     }
 
     chain postrouting {
@@ -3473,6 +3473,34 @@ nft -f /etc/nftables.conf
 systemctl enable nftables
 ```
 
+</details>
+
+
+<details>
+<summary><strong> Проверка </strong></summary>
+
+Проверку можно выполнить при помощи двух утелит
+
+Первая:
+
+```
+nmap -p 8080,2026 172.16.1.2
+```
+
+```
+nmap -p 8080,2026 172.16.2.2
+```
+
+Или вторая:
+
+```
+nc -zv 172.16.1.2 2026
+```
+
+```
+nc -zv 172.16.2.2 2026
+```
+  
 </details>
 
 <br/>
