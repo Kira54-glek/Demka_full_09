@@ -535,6 +535,7 @@ iptables-save > /etc/iptables/rules.v4
 
 </details>
 
+</details>
 
 <details>
 <summary><strong><code>Настройка через nftables (быстрее и удобнее) </code></strong></summary> 
@@ -571,7 +572,7 @@ sysctl -p
 systemctl restart networking
 ```
 
-</details>
+
 
 </details>
 
