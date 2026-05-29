@@ -561,9 +561,6 @@ nano /etc/nftables.conf
    ```
 
 ```
-#!/usr/sbin/nft -f
-
-flush ruleset
 
 table ip nat {
     chain prerouting {
@@ -596,9 +593,6 @@ nano /etc/nftables.conf
    ```
 
 ```
-#!/usr/sbin/nft -f
-
-flush ruleset
 
 table ip nat {
     chain prerouting {
@@ -1256,18 +1250,63 @@ systemctl restart netfilter-persistent
 </details>
 
 <details>
-<summary><strong>Альтарнативная настройка сетевой трансляции через <code> nftables </code> </strong></summary>
+<summary><strong>Альтарнативная настройка сетевой трансляции через <code> nftables </code> (быстрее и удобнее) </strong></summary>
 
 ### ВНИМАНИЕ! Если у вас не вышло настроить <code> NAT </code> через <code> nftables </code>, возвращайтесь к первому варианту!
 
+# На BR-RTR 
+
 ```
 table ip nat {
+    chain prerouting {
+        type nat hook prerouting priority dstnat; policy accept;
+
+        iifname "ens192" tcp dport 8080 dnat to 192.168.0.2:8080
+
+        iifname "ens192" tcp dport 2026 dnat to 192.168.0.2:2026
+    }
+
     chain postrouting {
-        type nat hook postrouting priority 100; policy accept;
+        type nat hook postrouting priority srcnat; policy accept;
+        
         oifname "ens192" masquerade
     }
 }
+
+
+table ip filter {
+    chain forward {
+        type filter hook forward priority filter; policy accept;
+    }
+}
 ```
+
+# На HQ-RTR
+
+```
+ table ip nat {
+    chain prerouting {
+        type nat hook prerouting priority dstnat; policy accept;
+
+        iifname "ens192" tcp dport 8080 dnat to 192.168.100.15:8080
+
+        iifname "ens192" tcp dport 2026 dnat to 192.168.100.15:2026
+    }
+
+    chain postrouting {
+        type nat hook postrouting priority srcnat; policy accept;
+        
+        oifname "ens192" masquerade
+    }
+}
+
+table ip filter {
+    chain forward {
+        type filter hook forward priority filter; policy accept;
+    }
+}
+```
+
 </details>
 
 </br>
@@ -1662,60 +1701,100 @@ nslookup **IP-адрес/DNS-имя**
 <summary><strong>Настройка при помощи <code>dnsmasq</code></strong>[Быстрее]</summary>
 <br/>
 
-Для начала устанавливаются необходимые пакеты:
+1. Установка пакетов (без iptables)
+
 ```
-apt install iptables iptables-persistent dnsmasq -y
+apt update && apt install nftables dnsmasq -y
 ```
 
-После чего необходимо открыть порт 53
+2. Настройка nftables (разрешение UDP и TCP для DNS)
+
 ```
-iptables -I INPUT -p udp --dport 53 -j ACCEPT
-netfilter-persistent save
+nft add rule inet filter input udp dport 53 accept
+nft add rule inet filter input tcp dport 53 accept
+nft list ruleset > /etc/nftables.conf
+systemctl enable nftables
+systemctl restart nftables
 ```
-Дальше конфигурируем файл `/etc/dnsmasq.conf`
+
+3. Конфигурация /etc/dnsmasq.conf
+
 ```
+cat << 'EOF' > /etc/dnsmasq.conf
 no-resolv
 interface=ens192
+listen-address=192.168.100.62,127.0.0.1
 read-ethers
-listen-address=192.168.100.62
+
 server=8.8.8.8
 server=8.8.4.4
+
 address=/hq-rtr.au-team.irpo/192.168.100.1
-address=/hq-srv.au-team.irpo/192.168.100.62
+address=/hq-srv.au-team.irpo/192.168.100.15
 address=/br-rtr.au-team.irpo/192.168.0.1
 address=/br-srv.au-team.irpo/192.168.0.2
 address=/hq-cli.au-team.irpo/192.168.200.3
+
 srv-host=_ldap._tcp.au-team.irpo,br-srv.au-team.irpo,389
 srv-host=_kerberos._tcp.au-team.irpo,br-srv.au-team.irpo,88
 srv-host=_kdc._tcp.au-team.irpo,br-srv.au-team.irpo,88
 srv-host=_kpasswd._tcp.au-team.irpo,br-srv.au-team.irpo,464
+
 cname=moodle.au-team.irpo,hq-rtr.au-team.irpo
 cname=wiki.au-team.irpo,br-rtr.au-team.irpo
+EOF
 ```
-Далее в файле hosts на HQ-SRV правим:
+
+4. Конфигурация локального сопоставления имен /etc/hosts
+
 ```
-nano /etc/hosts
-```
-```
+cat << 'EOF' > /etc/hosts
 127.0.0.1  localhost
 127.0.1.1  server.localdomain  server
 192.168.100.1  hq-rtr.au-team.irpo  hq-rtr
-192.168.100.62  hq-srv.au-team.irpo  hq-srv
+192.168.100.15  hq-srv.au-team.irpo  hq-srv
 192.168.0.1  br-rtr.au-team.irpo  br-rtr
 192.168.0.2  br-srv.au-team.irpo  br-srv
 192.168.200.3  hq-cli.au-team.irpo  hq-cli
+EOF
 ```
 
-Далее по окончанию настройки:
+5. Отключение конфликтующего системного DNS-резолвера (если активен)
+
 ```
+systemctl disable --now systemd-resolved 2>/dev/null || true
+```
+
+6. Перезапуск и добавление dnsmasq в автозагрузку
+
+```
+systemctl enable dnsmasq
 systemctl restart dnsmasq
 ```
 
-После чего, на ВСЕХ машинах, в конфигурационном файле `/etc/resolv.conf` добавляем строку:
+7. Настройка клиентов и самого сервера (/etc/resolv.conf)
+
 ```
+rm -f /etc/resolv.conf
+cat << 'EOF' > /etc/resolv.conf
 search au-team.irpo
-nameserver 192.168.100.62
+nameserver 192.168.100.15
+EOF
 ```
+Проверка:
+
+```
+nslookup ip 
+```
+или
+
+```
+nslookup DNS name
+```
+
+Результат:
+<img width="580" height="316" alt="image" src="https://github.com/user-attachments/assets/30b30163-e0c4-4b1c-8c2c-74e336cbd6cc" />
+
 
 </details>
   
@@ -2982,7 +3061,7 @@ ssh-copy-id -p 22 root@192.168.100.15
 ```
 
 ```
-ssh-copy-id -p 22 root@192.168.200.0 (if no jobs -> 192.168.200.ip_ha-cli)
+ssh-copy-id -p 22 root@192.168.200.2
 ```
 
 ```
@@ -3289,7 +3368,7 @@ mount /dev/sr0 /mnt/iso 2>/dev/null || mount -o loop /path/to/Additional.iso /mn
 Импорт dump.sql
 
 ```
- mariadb webdb < /home/admin/webapp/dump.sql
+mariadb webdb < /mnt/iso/web/dump.sql
 ```
 
 Проверка
@@ -3305,17 +3384,11 @@ mariadb -e "USE webdb; SHOW TABLES;"
 
 ```
 cp /mnt/iso/web/index.php /var/www/html/
-```
 
-```
 cp /mnt/iso/web/logo.png /var/www/html/
-```
 
-```
 chown -R www-data:www-data /var/www/html/
-```
 
-```
 chmod -R 755 /var/www/html/
 ```
 
@@ -3503,10 +3576,6 @@ nnao /etc/nftables.conf
 Прописывем конфиг на BR-RTR:
 
 ```
-#!/usr/sbin/nft -f
-
-flush ruleset
-
 table ip nat {
     chain prerouting {
         type nat hook prerouting priority dstnat; policy accept;
@@ -3535,10 +3604,6 @@ table ip filter {
 Прописываем конфиг на HQ-RTR:
 
 ```
-#!/usr/sbin/nft -f
-
-flush ruleset
-
 table ip nat {
     chain prerouting {
         type nat hook prerouting priority dstnat; policy accept;
@@ -3658,13 +3723,9 @@ apt update && apt install nginx -y
 
 ```
 systemctl enable nginx
-```
 
-```
 systemctl start nginx
-```
 
-```
 systemctl status nginx
 ```
 
@@ -3881,7 +3942,7 @@ curl -u WEB:P@ssw0rd http://web.au-team.irpo
 Указываем прямую ссылку:
 
 ```
-wget https://browser.yandex.ru/download/?os=linux&lang=ru -O yandex-browser.deb
+мwget https://browser.yandex.ru/download/?os=linux&lang=ru -O yandex-browser.deb
 ```
 
 Устанавливаем пакет
