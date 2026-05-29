@@ -540,6 +540,8 @@ iptables-save > /etc/iptables/rules.v4
 <details>
 <summary><strong><code>Настройка через nftables (быстрее и удобнее) </code></strong></summary> 
 
+# На ISP
+
   ```
 nano /etc/nftables.conf
    ```
@@ -551,6 +553,75 @@ table ip nat {
     }
 }
  ```
+
+# На BR-RTR
+
+ ```
+nano /etc/nftables.conf
+   ```
+
+```
+#!/usr/sbin/nft -f
+
+flush ruleset
+
+table ip nat {
+    chain prerouting {
+        type nat hook prerouting priority dstnat; policy accept;
+
+        iifname "ens192" tcp dport 8080 dnat to 192.168.0.2:8080
+
+        iifname "ens192" tcp dport 2026 dnat to 192.168.0.2:2026
+    }
+
+    chain postrouting {
+        type nat hook postrouting priority srcnat; policy accept;
+        
+        oifname "ens192" masquerade
+    }
+}
+
+
+table ip filter {
+    chain forward {
+        type filter hook forward priority filter; policy accept;
+    }
+}
+```
+
+# На HQ-RTR
+
+ ```
+nano /etc/nftables.conf
+   ```
+
+```
+#!/usr/sbin/nft -f
+
+flush ruleset
+
+table ip nat {
+    chain prerouting {
+        type nat hook prerouting priority dstnat; policy accept;
+
+        iifname "ens192" tcp dport 8080 dnat to 192.168.100.15:8080
+
+        iifname "ens192" tcp dport 2026 dnat to 192.168.100.15:2026
+    }
+
+    chain postrouting {
+        type nat hook postrouting priority srcnat; policy accept;
+        
+        oifname "ens192" masquerade
+    }
+}
+
+table ip filter {
+    chain forward {
+        type filter hook forward priority filter; policy accept;
+    }
+}
+```
 
 Если не работает:
 
