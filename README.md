@@ -3942,7 +3942,19 @@ curl -u WEB:P@ssw0rd http://web.au-team.irpo
 Указываем прямую ссылку:
 
 ```
-мwget https://browser.yandex.ru/download/?os=linux&lang=ru -O yandex-browser.deb
+wget "https://browser.yandex.ru/download/?banerid=6302000000&zih=1&beta=0&os=linux&x64=1&package=deb&full=1" -O yandex-stable.deb
+```
+
+или 
+
+```
+wget "https://browser.yandex.ru/download/?banerid=6302000000&zih=1&beta=1&os=linux&x64=1&package=deb&full=1" -O yandex.deb
+```
+
+Или
+
+```
+wget "https://browser.yandex.ru/download/?banerid=6302000000&zih=1&beta=1&os=linux&x64=1&package=deb&full=1"
 ```
 
 Устанавливаем пакет
@@ -3971,7 +3983,7 @@ yandex-browser --version
 Через командную строку:
 
 ```
-yandex-browser
+wich yandex-browser
 ```
 
 Через ярылк:
