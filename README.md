@@ -3965,6 +3965,21 @@ sudo dpkg -i yandex-browser.deb
 
 # Если возникли ошибки:
 
+Прописываем в resolv.conf dns сервера:
+
+```
+nameserver 77.88.8.8
+nameserver 1.1.1.1
+nameserver 8.8.8.8
+```
+
+Далее пишем apt update, для обновления информации о путях
+
+```
+apt update
+```
+
+
 ```
 sudo apt-get install -f -y
 ```
