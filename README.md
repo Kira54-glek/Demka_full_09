@@ -1122,6 +1122,31 @@ vtysh
 
 <br/>
 
+<details>
+<summary><strong> Если вы неправильно настроили OSPF или возникли ошибки</strong></summary>
+
+```
+vtysh
+```
+
+Полный сброс настроек
+
+```
+conf t
+no router ospf
+
+int gre1
+  no ip ospf network broadcast
+  no ip ospf passive
+  no ip ospf authentication
+  no ip ospf authentication-key
+exit
+exit
+write
+```
+
+  
+</details>
 
 <br/>
 Настройка маршрутов, если не работает <code><strong>OSPF</strong></code>:
