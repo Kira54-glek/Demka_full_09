@@ -253,7 +253,7 @@ address 192.168.211.1/28
 
 auto ens224:2  
 iface ens224:2 inet static  
-address 192.168.81.9/29
+address 192.168.81.1/29
 
 auto ens224.111  
 iface ens224.111 inet manual   
@@ -305,7 +305,7 @@ allow-hotplug ens192
 iface ens192 inet static
 address 192.168.0.2/28
 gateway 192.168.0.1
-dns-nameservers 192.168.111.2 192.111.0.2
+dns-nameservers 192.168.111.2 192.168.0.2
 dns-search au-team.irpo
 ```
 
@@ -567,9 +567,9 @@ table ip nat {
     chain prerouting {
         type nat hook prerouting priority dstnat; policy accept;
 
-        iifname "ens192" tcp dport 8081 dnat to 192.168.0.2:8080
+        iifname "ens192" tcp dport 8081 dnat to 192.168.0.2:8081
 
-        iifname "ens192" tcp dport 2011 dnat to 192.168.0.2:2026
+        iifname "ens192" tcp dport 2011 dnat to 192.168.0.2:2011
     }
 
     chain postrouting {
@@ -599,9 +599,9 @@ table ip nat {
     chain prerouting {
         type nat hook prerouting priority dstnat; policy accept;
 
-        iifname "ens192" tcp dport 8081 dnat to 192.168.111.15:8080
+        iifname "ens192" tcp dport 8081 dnat to 192.168.111.15:8081
 
-        iifname "ens192" tcp dport 2011 dnat to 192.168.111.15:2026
+        iifname "ens192" tcp dport 2011 dnat to 192.168.111.15:2011
     }
 
     chain postrouting {
@@ -834,7 +834,7 @@ address 192.168.211.1/28
 
 auto ens224:2  
 iface ens224:2 inet static  
-address 192.168.81.9/29
+address 192.168.81.1/29
 
 auto ens224.111  
 iface ens224.111 inet manual   
@@ -1287,9 +1287,9 @@ table ip nat {
     chain prerouting {
         type nat hook prerouting priority dstnat; policy accept;
 
-        iifname "ens192" tcp dport 8081 dnat to 192.168.0.2:8080
+        iifname "ens192" tcp dport 8081 dnat to 192.168.0.2:8081
 
-        iifname "ens192" tcp dport 2011 dnat to 192.168.0.2:2026
+        iifname "ens192" tcp dport 2011 dnat to 192.168.0.2:2011
     }
 
     chain postrouting {
@@ -1314,9 +1314,9 @@ table ip filter {
     chain prerouting {
         type nat hook prerouting priority dstnat; policy accept;
 
-        iifname "ens192" tcp dport 8081 dnat to 192.168.111.15:8080
+        iifname "ens192" tcp dport 8081 dnat to 192.168.111.15:8081
 
-        iifname "ens192" tcp dport 2011 dnat to 192.168.111.15:2026
+        iifname "ens192" tcp dport 2011 dnat to 192.168.111.15:2011
     }
 
     chain postrouting {
@@ -2558,9 +2558,9 @@ bash
 
 • Сконфигурируйте файловое хранилище на сервере HQ-SRV: 
 
-•	При помощи двух подключенных к серверу дополнительных дисков размером 1 Гб сконфигурируйте дисковый массив уровня 0 
+•	При помощи двух подключенных к серверу дополнительных дисков размером 1 Гб сконфигурируйте дисковый массив уровня 1 
 
-•	Имя устройства – md0, при необходимости конфигурация массива размещается в файле /etc/mdadm.conf 
+•	Имя устройства – md1, при необходимости конфигурация массива размещается в файле /etc/mdadm.conf 
 
 •	Создайте раздел, отформатируйте раздел, в качестве файловой системы используйте ext4 
 
@@ -2572,7 +2572,7 @@ bash
 
 
 <details>
-<summary><strong> ## Настройка RAID 0 </strong></summary>
+<summary><strong> ## Настройка RAID 1 </strong></summary>
 
 
 <br/>
@@ -2592,7 +2592,7 @@ apt install mdadm -y
 Компелируем диски в рейд:
 
 ```
-mdadm --create --verbose /dev/md0 --level=0 --raid-devices=2 /dev/sdb /dev/sdc
+mdadm --create --verbose /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc
 ```
 
 Создаём файл для коректного сюора рейда и заночим изминения:
@@ -2608,7 +2608,7 @@ mdadm --detail --scan --verbose >> /etc/mdadm.conf
 Разграничеваем пространстов диска:
 
 ```
-mkfs.ext4 /dev/md0
+mkfs.ext4 /dev/md1
 ```
 
 Создаём точку монтирования:
@@ -2620,7 +2620,7 @@ mkdir /raid
 Узнаём UUID масива, для внесения изминений в /etc/fstab
 
 ```
-blkid /dev/md0
+blkid /dev/md1
 ```
 
 Прверяем, создался ли масив:
@@ -2679,7 +2679,7 @@ umount /raid
 Останавливаем RAID:
 
 ```
-mdadm --stop /dev/md0
+mdadm --stop /dev/md1
 ```
 
 Очищаем суперблоки дисков:
@@ -3027,6 +3027,8 @@ nano /etc/ssh/sshd_config
 ```
 
 ```
+Port 8081
+
 Port 2011
 
 PermitRootLogin yes
@@ -3083,37 +3085,37 @@ ssh-keygen -t rsa
 Далее, производим копирование ключа на устройства, везде нужно будет ввести пароль P@ssw0rd:
 
 ```
-ssh-copy-id -p 22 root@192.168.111.15
+ssh-copy-id -p 2011 root@192.168.111.15
 ```
 
 ```
-ssh-copy-id -p 22 root@192.168.211.2
+ssh-copy-id -p 2011 root@192.168.211.2
 ```
 
 ```
-ssh-copy-id -p 22 root@172.16.10.2
+ssh-copy-id -p 2011 root@172.16.10.2
 ```
 
 ```
-ssh-copy-id -p 22 root@172.16.20.2
+ssh-copy-id -p 2011 root@172.16.20.2
 ```
 
 Проверьте подключенеиме.
 
 ```
-ssh -p 22 root@192.168.111.15
+ssh -p 2011 root@192.168.111.15
 ```
 
 ```
-ssh -p 22 root@192.168.211.3
+ssh -p 2011 root@192.168.211.3
 ```
 
 ```
-ssh -p 22 root@172.16.10.2
+ssh -p 2011 root@172.16.10.2
 ```
 
 ```
-ssh -p 22 root@172.16.20.2
+ssh -p 2011 root@172.16.20.2
 ```
 
 </details>
@@ -3143,10 +3145,10 @@ nano /etc/ansible/hosts
 Прописываме настроку хостов:
 
 ```
-HQ-SRV ansible_host=192.168.111.15 ansible_port=22  ansible_port=2026
-HQ-CLI ansible_host=192.168.211.2  ansible_port=22  ansible_port=2026
-HQ-RTR ansible_host=172.16.10.2    ansible_port=22    ansible_port=2026
-BR-RTR ansible_host=172.16.20.2    ansible_port=22    ansible_port=2026
+HQ-SRV ansible_host=192.168.111.15 ansible_port=2011  ansible_port=22
+HQ-CLI ansible_host=192.168.211.2  ansible_port=2011  ansible_port=22
+HQ-RTR ansible_host=172.16.10.2    ansible_port=2011    ansible_port=22
+BR-RTR ansible_host=172.16.20.2    ansible_port=2011    ansible_port=22
 ```
 
 Отключаем проверку подлиности, рнонходим в конфигурации Ansible:
@@ -3513,7 +3515,7 @@ iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 8081 -j DNAT --to-destina
 ```
 
 ```
-iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 81 -d 192.168.111.15 -j MASQUERADE
+iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 8081 -d 192.168.111.15 -j MASQUERADE
 ```
 
 Настройка порта 2026 (SSH):
@@ -3523,7 +3525,7 @@ iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 2011 -j DNAT --to-destina
 ```
 
 ```
-iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 11 -d 192.168.111.15 -j MASQUERADE
+iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 2011 -d 192.168.111.15 -j MASQUERADE
 ```
 
 ### На BR-RTR
@@ -3546,7 +3548,7 @@ iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 2011 -j DNAT --to-destina
 ```
 
 ```
-iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 11 -d 192.168.10.10 -j MASQUERADE
+iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 2011 -d 192.168.10.10 -j MASQUERADE
 ```
 
 Сохраняем правила:
@@ -3766,14 +3768,14 @@ nano /etc/nginx/sites-available/au-team
 ```
 # Reverse proxy for HQ-SRV web application
 server {
-    listen 80;
+    listen 8081;
     server_name web.au-team.irpo;
 
     location / {
         auth_basic "Restricted Content";   
         auth_basic_user_file /etc/nginx/.htpasswd;
 
-        proxy_pass http://192.168.111.15:81;  # Resolves via /etc/hosts
+        proxy_pass http://192.168.111.15:8081;  # Resolves via /etc/hosts
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -3856,7 +3858,7 @@ curl http://docker.au-team.irpo
 
 •	При обращении к сайту web.au-team.irpo клиенту должно быть предложено ввести аутентификационные данные 
 
-•	В качестве логина для аутентификации выберите WEBс паролем P@ssw0rd 
+•	В качестве логина для аутентификации выберите Kharitonc с паролем P@ssw0rd 
 
 •	Выберите файл /etc/nginx/.htpasswd в качестве хранилища учётных записей 
 
@@ -3878,7 +3880,7 @@ apt update && apt install apache2-utils -y
 Создаём файл усчётных записей
 
 ```
-htpasswd -bc /etc/nginx/.htpasswd WEB P@ssw0rd
+htpasswd -bc /etc/nginx/.htpasswd Kharitonc P@ssw0rd
 ```
 
 Проверка результата:
