@@ -30,7 +30,8 @@
 >```
 >```
 >nameserver 8.8.8.8 
->nameserver 77.88.8.8
+>nameserver 77.88.8.7
+>nameserver 77.88.8.3  
 >nameserver 1.1.1.1
 >```
 ></br>
@@ -215,10 +216,10 @@ newgrp
 ```
 auto ens224
 iface ens224 inet static
-address 172.16.1.1/28
+address 172.16.10.1/28
 auto ens256
 iface ens256 inet static
-address 172.16.2.1/28
+address 172.16.20.1/28
 ```
 
 ### HQ-RTR: (в 4 и 6 задании продолжение)
@@ -230,40 +231,40 @@ address 172.16.2.1/28
 ```
 auto ens192  
 iface ens192 inet static  
-address 172.16.1.2/28
-gateway 172.16.1.1
+address 172.16.10.2/28
+gateway 172.16.10.1
 
 auto gre1
 iface gre1 inet tunnel
 address 172.16.0.1
 netmask 255.255.255.240
 mode gre
-local 172.16.1.2
-endpoint 172.16.2.2
+local 172.16.10.2
+endpoint 172.16.20.2
 ttl 64
   
 auto ens224  
 iface ens224 inet static  
-address 192.168.100.1/27 
+address 192.168.111.1/27 
   
 auto ens224:1  
 iface ens224:1 inet static  
-address 192.168.200.1/28
+address 192.168.211.1/28
 
 auto ens224:2  
 iface ens224:2 inet static  
-address 192.168.99.9/29
+address 192.168.81.9/29
 
-auto ens224.100  
-iface ens224.100 inet manual   
+auto ens224.111  
+iface ens224.111 inet manual   
 Vlan-raw-device ens224  
   
-auto ens224.200  
-iface ens224.200 inet manual   
+auto ens224.211  
+iface ens224.211 inet manual   
 Vlan-raw-device ens224:1
 
-auto ens224.999  
-iface ens224.999 inet manual   
+auto ens224.811  
+iface ens224.811 inet manual   
 Vlan-raw-device ens224:2
 ```
 
@@ -276,8 +277,8 @@ Vlan-raw-device ens224:2
 ```
 allow-hotplug ens192
 iface ens192 inet static
-address 172.16.2.2/28
-gateway 172.16.2.1
+address 172.16.20.2/28
+gateway 172.16.20.1
 
 auto ens224
 iface ens224 inet static
@@ -288,8 +289,8 @@ iface gre1 inet tunnel
 address 172.16.0.2
 netmask 255.255.255.240
 mode gre
-local 172.16.2.2
-endpoint 172.16.1.2
+local 172.16.20.2
+endpoint 172.16.10.2
 ttl 64
 ```
 
@@ -304,7 +305,7 @@ allow-hotplug ens192
 iface ens192 inet static
 address 192.168.0.2/28
 gateway 192.168.0.1
-dns-nameservers 192.168.100.2 192.168.0.2
+dns-nameservers 192.168.111.2 192.111.0.2
 dns-search au-team.irpo
 ```
 
@@ -317,8 +318,8 @@ dns-search au-team.irpo
 ```
 allow-hotplug ens192
 iface ens192 inet static
-address 192.168.100.15/27
-gateway 192.168.100.1
+address 192.168.111.15/27
+gateway 192.168.111.1
 ```
 
 </details>
@@ -336,18 +337,18 @@ gateway 192.168.100.1
   </tr>
   <tr>
     <td align="center">SRV-Net (VLAN 100)</td>
-    <td align="center">192.168.100.0/27</td>
-    <td align="center">192.168.100.1-62</td>
+    <td align="center">192.168.111.0/27</td>
+    <td align="center">192.168.111.1-62</td>
   </tr>
   <tr>
     <td align="center">CLI-Net (VLAN 200)</td>
-    <td align="center">192.168.200.0/28</td>
-    <td align="center">192.168.200.1-14</td>
+    <td align="center">192.168.211.0/28</td>
+    <td align="center">192.168.211.1-14</td>
   </tr>
   <tr>
     <td align="center">MGMT (VLAN 999)</td>
-    <td align="center">192.168.99.0/29</td>
-    <td align="center">192.168.99.1-6</td>
+    <td align="center">192.168.81.0/29</td>
+    <td align="center">192.168.81.1-6</td>
   </tr>
   <tr>
     <td align="center">BR-Net</td>
@@ -356,13 +357,13 @@ gateway 192.168.100.1
   </tr>
   <tr>
     <td align="center">ISP-HQ</td>
-    <td align="center">172.16.1.0/28</td>
-    <td align="center">172.16.1.1 - 14</td>
+    <td align="center">172.16.10.0/28</td>
+    <td align="center">172.16.10.1 - 14</td>
   </tr>
   <tr>
     <td align="center">ISP-BR</td>
-    <td align="center">172.16.2.0/28</td>
-    <td align="center">172.16.2.1 - 14</td>
+    <td align="center">172.16.20.0/28</td>
+    <td align="center">172.16.20.1 - 14</td>
   </tr>
 </table>
 <p align="center"><strong>Таблица подсетей</strong></p>
@@ -388,14 +389,14 @@ gateway 192.168.100.1
   </tr>
   <tr>
     <td align="center">ens224</td>
-    <td align="center">172.16.1.1</td>
+    <td align="center">172.16.10.1</td>
     <td align="center">/28</td>
     <td align="center"></td>
     <td align="center">ISP-HQ-RTR</td>
   </tr>
   <tr>
     <td align="center">ens256</td>
-    <td align="center">172.16.2.1</td>
+    <td align="center">172.16.20.1</td>
     <td align="center">/28</td>
     <td align="center"></td>
     <td align="center">ISP-BR-RTR</td>
@@ -403,21 +404,21 @@ gateway 192.168.100.1
   <tr>
     <td align="center" rowspan="3">HQ-RTR</td>
     <td align="center">ens192</td>
-    <td align="center">172.16.1.2</td>
+    <td align="center">172.16.10.2</td>
     <td align="center">/28</td>
-    <td align="center">172.16.1.1</td>
+    <td align="center">172.16.10.1</td>
     <td align="center">ISP-HQ-RTR</td>
   </tr>
   <tr>
-    <td align="center">ens224.200</td>
-    <td align="center">192.168.200.1</td>
+    <td align="center">ens224.211</td>
+    <td align="center">192.168.211.1</td>
     <td align="center">/28</td>
     <td align="center"></td>
     <td align="center">HQ-RTR-CLI</td>
   </tr>
   <tr>
-    <td align="center">ens224.100</td>
-    <td align="center">192.168.100.1</td>
+    <td align="center">ens224.111</td>
+    <td align="center">192.168.111.1</td>
     <td align="center">/26</td>
     <td align="center"></td>
     <td align="center">HQ-RTR-SRV</td>
@@ -425,9 +426,9 @@ gateway 192.168.100.1
   <tr>
     <td align="center" rowspan="2">BR-RTR</td>
     <td align="center">ens192</td>
-    <td align="center">172.16.5.2</td>
+    <td align="center">172.16.20.2</td>
     <td align="center">/28</td>
-    <td align="center">172.16.5.1</td>
+    <td align="center">172.16.20.1</td>
     <td align="center">ISP-BR-RTR</td>
   </tr>
   <tr>
@@ -440,9 +441,9 @@ gateway 192.168.100.1
   <tr>
     <td align="center">HQ-SRV</td>
     <td align="center">ens192</td>
-    <td align="center">192.168.100.62</td>
+    <td align="center">192.168.111.15</td>
     <td align="center">/26</td>
-    <td align="center">192.168.100.1</td>
+    <td align="center">192.168.111.1</td>
     <td align="center">HQ-RTR-SRV</td>
   </tr>
   <tr>
@@ -456,9 +457,9 @@ gateway 192.168.100.1
   <tr>
     <td align="center">HQ-CLI</td>
     <td align="center">ens192</td>
-    <td align="center">192.168.200.##(DHCP)</td>
+    <td align="center">192.168.211.##(DHCP)</td>
     <td align="center">/28</td>
-    <td align="center">192.168.200.1</td>
+    <td align="center">192.168.211.1</td>
     <td align="center">HQ-RTR-CLI</td>
   </tr>
 </table>
@@ -482,9 +483,9 @@ gateway 192.168.100.1
 
   - Настройте маршруты по умолчанию там, где это необходимо 
 
-  - Интерфейс, к которому подключен HQ-RTR, подключен к сети 172.16.1.0/28 **[Выполнено в задании 1]**
+  - Интерфейс, к которому подключен HQ-RTR, подключен к сети 172.16.10.0/28 **[Выполнено в задании 1]**
 
-  - Интерфейс, к которому подключен BR-RTR, подключен к сети 172.16.2.0/28 **[Выполнено в задании 1]**
+  - Интерфейс, к которому подключен BR-RTR, подключен к сети 172.16.20.0/28 **[Выполнено в задании 1]**
 
   - На ISP настройте динамическую сетевую трансляцию в сторону HQ-RTR и BR-RTR для доступа к сети Интернет
 
@@ -504,8 +505,8 @@ echo net.ipv4.ip_forward=1 > /etc/sysctl.conf
 apt-get install iptables iptables-persistent –y
 ```
 ```
-iptables –t nat –A POSTROUTING –s 172.16.1.0/28 –o ens192 –j MASQUERADE  
-iptables –t nat –A POSTROUTING –s 172.16.2.0/28 –o ens192 –j MASQUERADE
+iptables –t nat –A POSTROUTING –s 172.16.10.0/28 –o ens192 –j MASQUERADE  
+iptables –t nat –A POSTROUTING –s 172.16.20.0/28 –o ens192 –j MASQUERADE
 netfilter-persistent save
 systemctl restart netfilter-persistent  
 ```
@@ -517,8 +518,8 @@ systemctl restart netfilter-persistent
 ```  
 apt install iptables  
 apt install iptables iptables-persistent  
-iptables –t nat –A POSTROUTING –s 172.16.1.0/28 –o ens192 –j MASQUERADE   
-iptables –t nat –A POSTROUTING –s 172.16.2.0/28 –o ens192 –j MASQUERADE   
+iptables –t nat –A POSTROUTING –s 172.16.10.0/28 –o ens192 –j MASQUERADE   
+iptables –t nat –A POSTROUTING –s 172.16.20.0/28 –o ens192 –j MASQUERADE   
 iptables-save > /etc/iptables/rules.v4  
 ```
 </br>
@@ -566,9 +567,9 @@ table ip nat {
     chain prerouting {
         type nat hook prerouting priority dstnat; policy accept;
 
-        iifname "ens192" tcp dport 8080 dnat to 192.168.0.2:8080
+        iifname "ens192" tcp dport 8081 dnat to 192.168.0.2:8080
 
-        iifname "ens192" tcp dport 2026 dnat to 192.168.0.2:2026
+        iifname "ens192" tcp dport 2011 dnat to 192.168.0.2:2026
     }
 
     chain postrouting {
@@ -598,9 +599,9 @@ table ip nat {
     chain prerouting {
         type nat hook prerouting priority dstnat; policy accept;
 
-        iifname "ens192" tcp dport 8080 dnat to 192.168.100.15:8080
+        iifname "ens192" tcp dport 8081 dnat to 192.168.111.15:8080
 
-        iifname "ens192" tcp dport 2026 dnat to 192.168.100.15:2026
+        iifname "ens192" tcp dport 2011 dnat to 192.168.111.15:2026
     }
 
     chain postrouting {
@@ -656,7 +657,7 @@ systemctl restart networking
 
   - Пароль пользователя sshuser с паролем P@ssw0rd
 
-  - Идентификатор пользователя 2026
+  - Идентификатор пользователя 2011
 
   - Пользователь sshuser должен иметь возможность запускать sudo без ввода пароля.
 
@@ -680,7 +681,7 @@ systemctl restart networking
 
 **1.** Создаём sshuser следующими командами:
 ```
-useradd sshuser -u 2026
+useradd sshuser -u 2011
 ```
 ```
 passwd sshuser
@@ -779,9 +780,9 @@ chmod 700 /home/net_admin
 
 ### Настройте на интерфейсе `HQ-RTR` в сторону офиса `HQ` виртуальный коммутатор
 
-- Сервер HQ-SRV должен находиться в ID VLAN 100
-- Клиент HQ-CLI в ID VLAN 200
-- Создайте подсеть управления с ID VLAN 999
+- Сервер HQ-SRV должен находиться в ID VLAN 111
+- Клиент HQ-CLI в ID VLAN 211
+- Создайте подсеть управления с ID VLAN 811
 - Основные сведения о настройке коммутатора и выбора реализации разделения на VLAN занесите в отчёт
 
 </details>
@@ -811,40 +812,40 @@ nano /etc/network/interfaces
 # The primary network interface
 auto ens192  
 iface ens192 inet static  
-address 172.16.1.2/28
-gateway 172.16.1.1
+address 172.16.10.2/28
+gateway 172.16.10.1
 
 auto gre1
 iface gre1 inet tunnel
 address 172.16.0.1
 netmask 255.255.255.240
 mode gre
-local 172.16.1.2
-endpoint 172.16.2.2
+local 172.16.10.2
+endpoint 172.16.20.2
 ttl 64
   
 auto ens224  
 iface ens224 inet static  
-address 192.168.100.1/27 
+address 192.168.111.1/27 
   
 auto ens224:1  
 iface ens224:1 inet static  
-address 192.168.200.1/28
+address 192.168.211.1/28
 
 auto ens224:2  
 iface ens224:2 inet static  
-address 192.168.99.9/29
+address 192.168.81.9/29
 
-auto ens224.100  
-iface ens224.100 inet manual   
+auto ens224.111  
+iface ens224.111 inet manual   
 Vlan-raw-device ens224  
   
-auto ens224.200  
-iface ens224.200 inet manual   
+auto ens224.211  
+iface ens224.211 inet manual   
 Vlan-raw-device ens224:1
 
-auto ens224.999  
-iface ens224.999 inet manual   
+auto ens224.811  
+iface ens224.811 inet manual   
 Vlan-raw-device ens224:2
 ```
 
@@ -859,7 +860,7 @@ Vlan-raw-device ens224:2
 
 ### Настройка безопасного удаленного доступа на серверах `HQ-SRV` и `BR-SRV`
 
-- Для подключения используйте порт 2026
+- Для подключения используйте порт 2011
 - Разрешите подключения только пользователю sshuser
 - Ограничьте количество попыток входа до двух
 - Настройте баннер «Authorized access only»
@@ -886,7 +887,7 @@ nano /etc/ssh/sshd_config
 ```
 
 ```
-Port 2026
+Port 2011
 MaxAuthTries 2
 PasswordAuthentication yes
 Banner /etc/ssh/banner
@@ -946,8 +947,8 @@ iface gre1 inet tunnel
 address 172.16.0.1
 netmask 255.255.255.240
 mode gre
-local 172.16.1.2
-endpoint 172.16.2.2
+local 172.16.10.2
+endpoint 172.16.20.2
 ttl 64
 ```
 
@@ -976,8 +977,8 @@ iface gre1 inet tunnel
 address 172.16.0.2
 netmask 255.255.255.240
 mode gre
-local 172.16.2.2
-endpoint 172.16.1.2
+local 172.16.20.2
+endpoint 172.16.10.2
 ttl 64
 ```
 
@@ -1056,8 +1057,8 @@ router ospf
   passive-interface default
   router-id 1.1.1.1
   network 172.16.0.0/28 area 0
-  network 192.168.100.0/27 area 1
-  network 192.168.200.0/28 area 2
+  network 192.168.111.0/27 area 1
+  network 192.168.211.0/28 area 2
   area 0 authentication
 exit
 
@@ -1193,8 +1194,8 @@ After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/sbin/ip route add 192.168.100.0/27 via 172.16.0.1 dev gre1
-ExecStart=/sbin/ip route add 192.168.200.0/28 via 172.16.0.1 dev gre1
+ExecStart=/sbin/ip route add 192.168.111.0/27 via 172.16.0.1 dev gre1
+ExecStart=/sbin/ip route add 192.168.211.0/28 via 172.16.0.1 dev gre1
 RemainAfterExit=yes
 
 [Install]
@@ -1243,10 +1244,10 @@ systemctl start iproute.service
 apt-get install iptables iptables-persistent –y
 ```
 ```
-iptables –t nat –A POSTROUTING –s 192.168.100.0/27 –o ens192 –j MASQUERADE
+iptables –t nat –A POSTROUTING –s 192.168.111.0/27 –o ens192 –j MASQUERADE
 ```
 ```
-iptables –t nat –A POSTROUTING –s 192.168.200.0/28 –o ens192 –j MASQUERADE
+iptables –t nat –A POSTROUTING –s 192.168.211.0/28 –o ens192 –j MASQUERADE
 ```
 ```
 netfilter-persistent save
@@ -1286,9 +1287,9 @@ table ip nat {
     chain prerouting {
         type nat hook prerouting priority dstnat; policy accept;
 
-        iifname "ens192" tcp dport 8080 dnat to 192.168.0.2:8080
+        iifname "ens192" tcp dport 8081 dnat to 192.168.0.2:8080
 
-        iifname "ens192" tcp dport 2026 dnat to 192.168.0.2:2026
+        iifname "ens192" tcp dport 2011 dnat to 192.168.0.2:2026
     }
 
     chain postrouting {
@@ -1313,9 +1314,9 @@ table ip filter {
     chain prerouting {
         type nat hook prerouting priority dstnat; policy accept;
 
-        iifname "ens192" tcp dport 8080 dnat to 192.168.100.15:8080
+        iifname "ens192" tcp dport 8081 dnat to 192.168.111.15:8080
 
-        iifname "ens192" tcp dport 2026 dnat to 192.168.100.15:2026
+        iifname "ens192" tcp dport 2011 dnat to 192.168.111.15:2026
     }
 
     chain postrouting {
@@ -1375,11 +1376,11 @@ nano /etc/dhcp/dhcpd.conf
 ```
 
 ```
-subnet 192.168.200.0 netmask 255.255.255.240 {
-  range 192.168.200.2 192.168.200.14;
-  option domain-name-servers 192.168.100.15;
+subnet 192.168.211.0 netmask 255.255.255.240 {
+  range 192.168.211.2 192.168.211.14;
+  option domain-name-servers 192.168.111.15;
   option domain-name "au-team.irpo";
-  option routers 192.168.200.1;
+  option routers 192.168.211.1;
   default-lease-time 600;
   max-lease-time 7200;
 }
@@ -1504,12 +1505,12 @@ nano /etc/bind/named.conf.options
 ```
 options {
   directory "/var/cache/bind";
-  listen-on { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/28; 172.16.0.0/28; };
+  listen-on { 127.0.0.1; 192.168.111.0/27; 192.168.211.0/28; 192.168.0.0/28; 172.16.0.0/28; };
   forwarders { 8.8.8.8;  8.8.4.4; };
   recursion yes;
-  allow-query { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/28; 172.16.0.0/28; };
-  allow-query-cache { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/28; 172.16.0.0/28; };
-  allow-recursion { 127.0.0.1; 192.168.100.0/27; 192.168.200.0/28; 192.168.0.0/28; 172.16.0.0/28; };
+  allow-query { 127.0.0.1; 192.168.111.0/27; 192.168.211.0/28; 192.168.0.0/28; 172.16.0.0/28; };
+  allow-query-cache { 127.0.0.1; 192.168.111.0/27; 192.168.211.0/28; 192.168.0.0/28; 172.16.0.0/28; };
+  allow-recursion { 127.0.0.1; 192.168.111.0/27; 192.168.211.0/28; 192.168.0.0/28; 172.16.0.0/28; };
   dnssec-validation auto;
 };
 ```
@@ -1542,7 +1543,7 @@ nano /etc/resolv.conf
 ```
 
 ```
-nameserver 192.168.100.15
+nameserver 192.168.111.15
 search au-team.irpo
 ```
 </br>
@@ -1559,14 +1560,14 @@ zone "au-team.irpo" {
   file "/etc/bind/au-team.irpo";
 };
 
-zone "100.168.192.in-addr.arpa" {
+zone "111.168.192.in-addr.arpa" {
   type master;
-  file "/etc/bind/100.168.192.in-addr.arpa";
+  file "/etc/bind/111.168.192.in-addr.arpa";
 };
 
-zone "200.168.192.in-addr.arpa" {
+zone "211.168.192.in-addr.arpa" {
   type master;
-  file "/etc/bind/200.168.192.in-addr.arpa";
+  file "/etc/bind/211.168.192.in-addr.arpa";
 };
 
 zone "0.168.192.in-addr.arpa" {
@@ -1599,11 +1600,11 @@ $TTL    1D
                                 1H              ; ncache
                         )
 @       IN      NS      hq-srv.au-team.irpo.
-@       IN      A       192.168.100.15
-hq-rtr  IN      A       192.168.100.1
+@       IN      A       192.168.111.15
+hq-rtr  IN      A       192.168.111.1
 br-rtr  IN      A       192.168.0.1
-hq-srv  IN      A       192.168.100.15
-hq-cli  IN      A       192.168.200.2
+hq-srv  IN      A       192.168.111.15
+hq-cli  IN      A       192.168.211.2
 br-srv  IN      A       192.168.0.2
 moodle  IN      CNAME   hq-rtr
 wiki    IN      CNAME   br-rtr
@@ -1618,15 +1619,15 @@ _kpasswd._tcp.au-team.irpo.         IN      SRV     0 100 464 br-srv.au-team.irp
 
 **9.** После чего **создаем файлы** командами:
 ```
-cp /etc/bind/db.127 /etc/bind/100.168.192.in-addr.arpa
-cp /etc/bind/db.127 /etc/bind/200.168.192.in-addr.arpa
+cp /etc/bind/db.127 /etc/bind/111.168.192.in-addr.arpa
+cp /etc/bind/db.127 /etc/bind/211.168.192.in-addr.arpa
 cp /etc/bind/db.127 /etc/bind/0.168.192.in-addr.arpa
 ```
 </br>
 
-**10.** После изменений файл **`100.168.192.in-addr.arpa`** выглядит так:
+**10.** После изменений файл **`111.168.192.in-addr.arpa`** выглядит так:
 ```
-nano /etc/bind/100.168.192.in-addr.arpa
+nano /etc/bind/111.168.192.in-addr.arpa
 ```
 
 ```
@@ -1645,9 +1646,9 @@ $TTL    1D
 
 </br>
 
-**11.** После изменений файл **`200.168.192.in-addr.arpa`** выглядит так:
+**11.** После изменений файл **`211.168.192.in-addr.arpa`** выглядит так:
 ```
-nano /etc/bind/200.168.192.in-addr.arpa
+nano /etc/bind/211.168.192.in-addr.arpa
 ```
 
 ```
@@ -1707,7 +1708,7 @@ nano /etc/resolv.conf
 ```
 
 ```
-nameserver 192.168.100.15
+nameserver 192.168.111.15
 search au-team.irpo
 ```
 </br>
@@ -1748,17 +1749,17 @@ systemctl restart nftables
 cat << 'EOF' > /etc/dnsmasq.conf
 no-resolv
 interface=ens192
-listen-address=192.168.100.62,127.0.0.1
+listen-address=192.168.111.62,127.0.0.1
 read-ethers
 
 server=8.8.8.8
 server=8.8.4.4
 
-address=/hq-rtr.au-team.irpo/192.168.100.1
-address=/hq-srv.au-team.irpo/192.168.100.15
+address=/hq-rtr.au-team.irpo/192.168.111.1
+address=/hq-srv.au-team.irpo/192.168.111.15
 address=/br-rtr.au-team.irpo/192.168.0.1
 address=/br-srv.au-team.irpo/192.168.0.2
-address=/hq-cli.au-team.irpo/192.168.200.3
+address=/hq-cli.au-team.irpo/192.168.211.3
 
 srv-host=_ldap._tcp.au-team.irpo,br-srv.au-team.irpo,389
 srv-host=_kerberos._tcp.au-team.irpo,br-srv.au-team.irpo,88
@@ -1776,11 +1777,11 @@ EOF
 cat << 'EOF' > /etc/hosts
 127.0.0.1  localhost
 127.0.1.1  server.localdomain  server
-192.168.100.1  hq-rtr.au-team.irpo  hq-rtr
-192.168.100.15  hq-srv.au-team.irpo  hq-srv
+192.168.111.1  hq-rtr.au-team.irpo  hq-rtr
+192.168.111.15  hq-srv.au-team.irpo  hq-srv
 192.168.0.1  br-rtr.au-team.irpo  br-rtr
 192.168.0.2  br-srv.au-team.irpo  br-srv
-192.168.200.3  hq-cli.au-team.irpo  hq-cli
+192.168.211.3  hq-cli.au-team.irpo  hq-cli
 EOF
 ```
 
@@ -1803,7 +1804,7 @@ systemctl restart dnsmasq
 rm -f /etc/resolv.conf
 cat << 'EOF' > /etc/resolv.conf
 search au-team.irpo
-nameserver 192.168.100.15
+nameserver 192.168.111.15
 EOF
 ```
 Проверка:
@@ -2749,13 +2750,13 @@ nano /etc/exports
 И прописываем в нём следующее значение (ip адресс устройства должен быть точным):
 
 ```
-/raid/nfs  192.168.200.0/28(rw,sync,no_subtree_check)
+/raid/nfs  192.168.211.0/28(rw,sync,no_subtree_check)
 ```
 
 Или
 
 ```
-echo "/raid/nfs 192.168.200.3/28(rw,sync,no_subtree_check)" >> /etc/exports
+echo "/raid/nfs 192.168.211.3/28(rw,sync,no_subtree_check)" >> /etc/exports
 ```
 
 ## Если дальше по заданию не заработает, укажите точный IP
@@ -2791,7 +2792,7 @@ apt install autofs -y
 Проверяем соедиение:
 
 ```
-showmount -e 192.168.100.15
+showmount -e 192.168.111.15
 ```
 
 Должени быть следующий результат:
@@ -2813,13 +2814,13 @@ nano /etc/fstab
 Добавляем следующую строку в файл:
 
 ```
-192.168.100.15:/raid/nfs  /mnt/nfs  nfs  defaults,_netdev  0  0
+192.168.111.15:/raid/nfs  /mnt/nfs  nfs  defaults,_netdev  0  0
 ```
 
 Или
 
 ```
-echo "192.168.100.15:/raid/nfs  /mnt/nfs  nfs  defaults,_netdev  0  0" >> /etc/fstab
+echo "192.168.111.15:/raid/nfs  /mnt/nfs  nfs  defaults,_netdev  0  0" >> /etc/fstab
 ```
 
 Перезагружаем демона
@@ -2851,7 +2852,7 @@ df -h | grep nfs
 Помимо основных проверок, чт обыли сделаны выше:
 
 ```
-showmount -e 192.168.100.15
+showmount -e 192.168.111.15
 ```
 
 ```
@@ -2954,11 +2955,11 @@ nano /etc/chrony/chrony.conf
 ```
 
 ```
-server 172.16.1.1 iburst
+server 172.16.10.1 iburst
 ```
 
 ```
-server 172.16.2.1 iburst
+server 172.16.20.1 iburst
 ```
 
 Приминяем настройки:
@@ -3026,7 +3027,7 @@ nano /etc/ssh/sshd_config
 ```
 
 ```
-Port 2026
+Port 2011
 
 PermitRootLogin yes
 ```
@@ -3058,13 +3059,13 @@ nano /etc/hosts
 Прописываем адресацию, для того, что бы сервер мог обнаружить устройства.
 
 ```
-192.168.100.15 HQ-SRV
+192.168.111.15 HQ-SRV
 
-192.168.200.0 HQ-CLI ( if no jobs -> 192.168.200.ip_hq-cli)
+192.168.211.0 HQ-CLI ( if no jobs -> 192.168.211.ip_hq-cli)
 
-172.16.1.2 HQ-RTR
+172.16.10.2 HQ-RTR
 
-172.16.2.2 BR-RTR
+172.16.20.2 BR-RTR
 ```
 
 Посел так же устанавливаем SSH на BR-SRV:
@@ -3082,37 +3083,37 @@ ssh-keygen -t rsa
 Далее, производим копирование ключа на устройства, везде нужно будет ввести пароль P@ssw0rd:
 
 ```
-ssh-copy-id -p 22 root@192.168.100.15
+ssh-copy-id -p 22 root@192.168.111.15
 ```
 
 ```
-ssh-copy-id -p 22 root@192.168.200.2
+ssh-copy-id -p 22 root@192.168.211.2
 ```
 
 ```
-ssh-copy-id -p 22 root@172.16.1.2
+ssh-copy-id -p 22 root@172.16.10.2
 ```
 
 ```
-ssh-copy-id -p 22 root@172.16.2.2
+ssh-copy-id -p 22 root@172.16.20.2
 ```
 
 Проверьте подключенеиме.
 
 ```
-ssh -p 22 root@192.168.100.15
+ssh -p 22 root@192.168.111.15
 ```
 
 ```
-ssh -p 22 root@192.168.200.3
+ssh -p 22 root@192.168.211.3
 ```
 
 ```
-ssh -p 22 root@172.16.1.2
+ssh -p 22 root@172.16.10.2
 ```
 
 ```
-ssh -p 22 root@172.16.2.2
+ssh -p 22 root@172.16.20.2
 ```
 
 </details>
@@ -3142,10 +3143,10 @@ nano /etc/ansible/hosts
 Прописываме настроку хостов:
 
 ```
-HQ-SRV ansible_host=192.168.100.15 ansible_port=22  ansible_port=2026
-HQ-CLI ansible_host=192.168.200.2  ansible_port=22  ansible_port=2026
-HQ-RTR ansible_host=172.16.1.2    ansible_port=22    ansible_port=2026
-BR-RTR ansible_host=172.16.2.2    ansible_port=22    ansible_port=2026
+HQ-SRV ansible_host=192.168.111.15 ansible_port=22  ansible_port=2026
+HQ-CLI ansible_host=192.168.211.2  ansible_port=22  ansible_port=2026
+HQ-RTR ansible_host=172.16.10.2    ansible_port=22    ansible_port=2026
+BR-RTR ansible_host=172.16.20.2    ansible_port=22    ansible_port=2026
 ```
 
 Отключаем проверку подлиности, рнонходим в конфигурации Ansible:
@@ -3460,7 +3461,7 @@ systemctl restart mariadb
 На клиенте:
 
 ```
-http://192.168.100.15/index.php
+http://192.168.111.15/index.php
 ```
 
 или
@@ -3486,13 +3487,13 @@ php /var/www/html/index.php | head -n 10
 
 На маршрутизаторах сконфигурируйте статическую трансляцию портов: 
 
-•	Пробросьте порт 8080в порт приложения testapp BR-SRV на маршрутизаторе BR-RTR, для обеспечения работы приложения testapp извне 
+•	Пробросьте порт 8081в порт приложения testapp BR-SRV на маршрутизаторе BR-RTR, для обеспечения работы приложения testapp извне 
 
-•	Пробросьте порт 8080в порт веб приложения на HQ-SRV на маршрутизаторе HQ-RTR, для обеспечения работы веб приложения извне 
+•	Пробросьте порт 8081в порт веб приложения на HQ-SRV на маршрутизаторе HQ-RTR, для обеспечения работы веб приложения извне 
 
-•	Пробросьте порт 2026на маршрутизаторе HQ-RTR в порт 2026сервера HQ-SRV, для подключения к серверу по протоколу ssh из внешних сетей 
+•	Пробросьте порт 2011на маршрутизаторе HQ-RTR в порт 2026сервера HQ-SRV, для подключения к серверу по протоколу ssh из внешних сетей 
 
-•	Пробросьте порт 2026на маршрутизаторе BR-RTR в порт 2026сервера BR-SRV, для подключения к серверу по протоколу ssh из внешних сетей. 
+•	Пробросьте порт 2011на маршрутизаторе BR-RTR в порт 2026сервера BR-SRV, для подключения к серверу по протоколу ssh из внешних сетей. 
   
 </details>
 
@@ -3508,21 +3509,21 @@ php /var/www/html/index.php | head -n 10
 Настройка порта 8080:
 
 ```
-iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 8080 -j DNAT --to-destination 192.168.100.15:8080
+iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 8081 -j DNAT --to-destination 192.168.111.15:8081
 ```
 
 ```
-iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 80 -d 192.168.100.15 -j MASQUERADE
+iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 81 -d 192.168.111.15 -j MASQUERADE
 ```
 
 Настройка порта 2026 (SSH):
 
 ```
-iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 2026 -j DNAT --to-destination 192.168.100.15:2026
+iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 2011 -j DNAT --to-destination 192.168.111.15:2011
 ```
 
 ```
-iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 22 -d 192.168.100.15 -j MASQUERADE
+iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 11 -d 192.168.111.15 -j MASQUERADE
 ```
 
 ### На BR-RTR
@@ -3531,21 +3532,21 @@ iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 22 -d 192.168.100.15 -j 
 
 
 ```
-iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 8080 -j DNAT --to-destination 192.168.0.2:8080
+iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 8081 -j DNAT --to-destination 192.168.0.2:8081
 ```
 
 ```
-iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 8080 -d 192.168.0.2 -j MASQUERADE
+iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 8081 -d 192.168.0.2 -j MASQUERADE
 ```
 
 Настройка порта 2026:
 
 ```
-iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 2026 -j DNAT --to-destination 192.168.0.2:2026
+iptables -t nat -A PREROUTING -i ens192 -p tcp --dport 2011 -j DNAT --to-destination 192.168.0.2:2011
 ```
 
 ```
-iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 22 -d 192.168.10.10 -j MASQUERADE
+iptables -t nat -A POSTROUTING -o ens224 -p tcp --dport 11 -d 192.168.10.10 -j MASQUERADE
 ```
 
 Сохраняем правила:
@@ -3567,24 +3568,24 @@ netfilter-persistent reload
 # Проверка веб-приложения на HQ-SRV
 
 ```
-curl http://203.0.113.20:8080
+curl http://192.168.111.15:8081
 ```
 # Проверка Docker-приложения на BR-SRV
 
 ```
-curl http://203.0.113.10:8080
+curl http://192.168.0.2:8081
 ```
 
 # Проверка SSH на HQ-SRV
 
 ```
-ssh -p 2026 webuser@203.0.113.20
+ssh -p 2011 webuser@192.168.111.15
 ```
 
 # Проверка SSH на BR-SRV
 
 ```
-ssh -p 2026 webuser@203.0.113.10
+ssh -p 2011 webuser@192.168.0.2
 ```
   
 </details>
@@ -3605,9 +3606,9 @@ table ip nat {
     chain prerouting {
         type nat hook prerouting priority dstnat; policy accept;
 
-        iifname "ens192" tcp dport 8080 dnat to 192.168.0.2:8080
+        iifname "ens192" tcp dport 8081 dnat to 192.168.0.2:8081
 
-        iifname "ens192" tcp dport 2026 dnat to 192.168.0.2:2026
+        iifname "ens192" tcp dport 2011 dnat to 192.168.0.2:2011
     }
 
     chain postrouting {
@@ -3633,9 +3634,9 @@ table ip nat {
     chain prerouting {
         type nat hook prerouting priority dstnat; policy accept;
 
-        iifname "ens192" tcp dport 8080 dnat to 192.168.100.15:8080
+        iifname "ens192" tcp dport 8081 dnat to 192.168.111.15:8081
 
-        iifname "ens192" tcp dport 2026 dnat to 192.168.100.15:2026
+        iifname "ens192" tcp dport 2011 dnat to 192.168.111.15:2011
     }
 
     chain postrouting {
@@ -3681,21 +3682,21 @@ systemctl enable nftables
 Первая:
 
 ```
-nmap -p 8080,2026 172.16.1.2
+nmap -p 8081,2011 172.16.10.2
 ```
 
 ```
-nmap -p 8080,2026 172.16.2.2
+nmap -p 8081,2011 172.16.20.2
 ```
 
 Или вторая:
 
 ```
-nc -zv 172.16.1.2 2026
+nc -zv 172.16.10.2 2011
 ```
 
 ```
-nc -zv 172.16.2.2 2026
+nc -zv 172.16.20.2 2011
 ```
   
 </details>
@@ -3733,7 +3734,7 @@ nano /etc/hosts
 Обозначение маршрутов:
 
 ```
-192.168.100.15 HQ-SRV
+192.168.111.15 HQ-SRV
 192.168.0.2 BR-SRV
 ```
 
@@ -3772,7 +3773,7 @@ server {
         auth_basic "Restricted Content";   
         auth_basic_user_file /etc/nginx/.htpasswd;
 
-        proxy_pass http://192.168.100.15:80;  # Resolves via /etc/hosts
+        proxy_pass http://192.168.111.15:81;  # Resolves via /etc/hosts
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -3781,11 +3782,11 @@ server {
 
 # Reverse proxy for BR-SRV Docker web application
 server {
-    listen 80;
+    listen 81;
     server_name docker.au-team.irpo;
 
     location / {
-        proxy_pass http://192.168.0.2:8080;  # Resolves via /etc/hosts
+        proxy_pass http://192.168.0.2:8081;  # Resolves via /etc/hosts
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -3822,8 +3823,8 @@ nano /etc/hosts
 ```
 
 ```
-172.16.4.1 web.au-team.irpo
-172.16.4.1 docker.au-team.irpo
+172.16.10.1 web.au-team.irpo
+172.16.20.1 docker.au-team.irpo
 ```
 
 ## Проверка
@@ -3895,7 +3896,7 @@ nano /etc/nginx/sites-available/au-team
 
 >server {
 >   
->   listen 80;
+>   listen 81;
 >   
 >  server_name web.au-team.irpo;
 >
