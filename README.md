@@ -1491,6 +1491,31 @@ systemctl enable isc-dhcp-server
 <details>
 <summary><strong>Настройка при помощи <code>bind9</code></strong>[Дольше]</summary>
 
+<details>
+<summary><strong>Если возникли ошибки при установке</strong>[Дольше]</summary>
+
+Полное очищение от bind9:
+
+```
+apt-get purge bind9 bind9-utils bind9-dnsutils dnsmasq -y
+```
+
+```
+apt-get autoremove --purge -y
+```
+
+```
+rm -rf /etc/bind
+```
+
+Обновление имеющейся информации о пакетах на устройстве:
+
+```
+apt update
+```
+  
+</details>
+
 <br/>
 
 ## > Настройка BIND9 на `HQ-SRV`<
@@ -1595,6 +1620,8 @@ cp /etc/bind/db.local /etc/bind/au-team.irpo
 
 </br>
 
+# Если файл не найден, то ничего страшного, просто создайте его сами через команду <code>touch</code>!!
+
 **8.** После чего приводим **файл `au-team.irpo`** к следующему виду:
 ```
 nano /etc/bind/au-team.irpo
@@ -1603,7 +1630,7 @@ nano /etc/bind/au-team.irpo
 ```
 $TTL    1D
 @       IN      SOA     hq-srv.au-team.irpo. root.au-team.irpo. (
-                                2024102200      ; serial
+                                2026102200      ; serial
                                 12H             ; refresh
                                 1H              ; retry
                                 1W              ; expire
@@ -1643,7 +1670,7 @@ nano /etc/bind/111.168.192.in-addr.arpa
 ```
 $TTL    1D
 @       IN      SOA     hq-srv.au-team.irpo. root.au-team.irpo. (
-                                2024102200      ; Serial
+                                2026102200      ; Serial
                                 12H             ; Refresh
                                 1H              ; Retry
                                 1W              ; Expire
@@ -1664,7 +1691,7 @@ nano /etc/bind/211.168.192.in-addr.arpa
 ```
 $TTL    1D
 @       IN      SOA     hq-srv.au-team.irpo. root.au-team.irpo. (
-                                2024102200      ; Serial
+                                2026102200      ; Serial
                                 12H             ; Refresh
                                 1H              ; Retry
                                 1W              ; Expire
@@ -1684,7 +1711,7 @@ nano /etc/bind/0.168.192.in-addr.arpa
 ```
 $TTL    1D
 @       IN      SOA     hq-srv.au-team.irpo. root.au-team.irpo. (
-                                2024102200      ; Serial
+                                2026102200      ; Serial
                                 12H             ; Refresh
                                 1H              ; Retry
                                 1W              ; Expire
@@ -1704,6 +1731,11 @@ $TTL    1D
 named-checkconf -z
 ```
 </br>
+
+Вывод должен быть такой:
+
+
+
 
 **14.** А также перезапускаем **`bind`** командой:
 
@@ -1759,7 +1791,7 @@ systemctl restart nftables
 cat << 'EOF' > /etc/dnsmasq.conf
 no-resolv
 interface=ens192
-listen-address=192.168.111.62,127.0.0.1
+listen-address=192.168.111.15,127.0.0.1
 read-ethers
 
 server=8.8.8.8
