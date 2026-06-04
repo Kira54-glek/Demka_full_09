@@ -1949,9 +1949,13 @@ nano /etc/resolv.conf
 ```
 nameserver 8.8.8.8
 
+nameserver 192.168.111.15
+
 nameserver 1.1.1.1
 
 search br-srv.au-team.irpo
+
+search au-team.irpo
 ```
 
 </br>
@@ -2412,21 +2416,13 @@ samba-tool group addunixattrs hq 10065
 
 ```
  samba-tool user addunixattrs hquser1 10060 --gid-number=10065 
-```
 
-```
- samba-tool user addunixattrs hquser2 10061 --gid-number=10065 
-```
+ samba-tool user addunixattrs hquser2 10061 --gid-number=10065
 
-```
  samba-tool user addunixattrs hquser3 10062 --gid-number=10065 
-```
 
-```
  samba-tool user addunixattrs hquser4 10063 --gid-number=10065 
-```
 
-```
 samba-tool user addunixattrs hquser5 10064 --gid-number=10065 
 ```
 
@@ -2634,7 +2630,7 @@ apt install mdadm -y
 Компелируем диски в рейд:
 
 ```
-mdadm --create --verbose /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc
+mdadm --create --verbose /dev/md1 --level=1 --raid-devices=2 /dev/sdb /dev/sdc
 ```
 
 Создаём файл для коректного сюора рейда и заночим изминения:
@@ -2798,7 +2794,7 @@ nano /etc/exports
 Или
 
 ```
-echo "/raid/nfs 192.168.211.3/28(rw,sync,no_subtree_check)" >> /etc/exports
+echo "/raid/nfs 192.168.211.2/28(rw,sync,no_subtree_check)" >> /etc/exports
 ```
 
 ## Если дальше по заданию не заработает, укажите точный IP
@@ -3076,7 +3072,7 @@ Port 2011
 PermitRootLogin yes
 ```
 
-# Как должно выглядеть устройство:
+# Как должн выглядеть сервер:
 
 <img width="560" height="146" alt="изображение" src="https://github.com/user-attachments/assets/53e0cce3-5677-43bd-a0a8-7e4ea1b7eb6a" />
 
@@ -3127,7 +3123,7 @@ ssh-keygen -t rsa
 Далее, производим копирование ключа на устройства, везде нужно будет ввести пароль P@ssw0rd:
 
 ```
-ssh-copy-id -p 2011 root@192.168.111.15
+ssh-copy-id -p 2011 sshuser@192.168.111.15
 ```
 
 ```
@@ -3135,17 +3131,17 @@ ssh-copy-id -p 2011 root@192.168.211.2
 ```
 
 ```
-ssh-copy-id -p 2011 root@172.16.10.2
+ssh-copy-id  root@172.16.10.2
 ```
 
 ```
-ssh-copy-id -p 2011 root@172.16.20.2
+ssh-copy-id  root@172.16.20.2
 ```
 
 Проверьте подключенеиме.
 
 ```
-ssh -p 2011 root@192.168.111.15
+ssh -p 2011 sshuser@192.168.111.15
 ```
 
 ```
@@ -3153,11 +3149,11 @@ ssh -p 2011 root@192.168.211.3
 ```
 
 ```
-ssh -p 2011 root@172.16.10.2
+ssh root@172.16.10.2
 ```
 
 ```
-ssh -p 2011 root@172.16.20.2
+ssh  root@172.16.20.2
 ```
 
 </details>
