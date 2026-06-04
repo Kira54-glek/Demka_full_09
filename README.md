@@ -892,11 +892,21 @@ MaxAuthTries 2
 PasswordAuthentication yes
 Banner /etc/ssh/banner
 AllowUsers  sshuser
-           ^ - это TAB
+         
 ```
+          ^ - это TAB
+
+
+
 <br/>
 
 **3.** После чего требуется создать файл **`/etc/ssh/banner`** и привести его в следующую форму:
+
+```
+nano /etc/ssh/banner
+```
+
+
 ```
 ----------------------
 Authorized access only
