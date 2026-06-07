@@ -1122,14 +1122,18 @@ write
 
 ### ПРОВЕРКА
 
-Пингуем: **`BR-SRV - > HQ-SRV`** и **`BR-SRV - > HQ-CLI`**
+Пингуем: **`BR-SRV - > 192.168.100.62 HQ-SRV`** и **`BR-SRV - > 192.168.200.3 HQ-CLI`**
 
-Проверка в **FRR**:
+Проверка в **FRR** на HQ-RTR и BR-RTR:
 
 ```
 vtysh
-  show ip ospf neighbor
-  show ip route ospf
+  show ip ospf neighbor - вывод
+Neighbor ID     Pri State           Dead Time Address         Interface
+2.2.2.2           1 Full/DR           00:00:35 172.16.0.2      gre1
+  show ip route ospf - вывод
+O   192.168.0.0/27 [110/2] via 172.16.0.2, gre1, 00:01:23
+O   192.168.200.0/28 [110/3] via 172.16.0.2, gre1, 00:01:23
 ```
 
 </details>
