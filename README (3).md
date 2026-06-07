@@ -4,7 +4,7 @@
 # <div align="center"><strong>⚙️</strong></div> <div align="center"><strong>МОДУЛЬ 1</strong></div>
 
 <br/>
-14
+Порядок выполнения 1 модуль: 11,1,3,Предна,2(Nat),apt update,4,6,7,
 <br/>
 
 > [!WARNING]
