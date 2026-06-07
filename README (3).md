@@ -1121,6 +1121,14 @@ write
 ```
 
 ### ПРОВЕРКА
+После настройки обязательно выполни:
+bash
+vtysh
+show ip ospf interface gre1 - Должно быть State: DR или State: BDR. 
+И проверь соседа:
+bash
+show ip ospf neighbor
+Только если есть сосед в Full — OSPF работает.
 
 Пингуем: **`BR-SRV - > 192.168.100.62 HQ-SRV`** и **`BR-SRV - > 192.168.200.3 HQ-CLI`**
 
