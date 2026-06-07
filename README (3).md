@@ -38,7 +38,7 @@
 >
 > На **РОУТЕРАХ** sysctl -p:
 >```
-> echo net.ipv4.ip_forward=1 > /etc/sysctl.conf
+> echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf
 >```
 > 
 > После, приминем настройки
@@ -113,7 +113,7 @@
 ## ✔️ Задание 1 <code>[ Адрессация + Имя устройства]</code>
 
 > [!WARNING]
-> В инструкции по сетевой настройке используется редактирование: <strong>`etc/network/interfaces`</strong>
+> В инструкции по сетевой настройке используется редактирование: <strong>`nano /etc/network/interfaces`</strong>
 
 > [!NOTE]
 > **Используй редактор файлов: `nano`**
@@ -499,7 +499,7 @@ gateway 192.168.111.1
 ### Настройка динамической сетевой трансляции на _`ISP`_
 
 ```
-echo net.ipv4.ip_forward=1 > /etc/sysctl.conf
+echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf
 ```
 ```
 apt-get install iptables iptables-persistent –y
